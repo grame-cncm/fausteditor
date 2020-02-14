@@ -5,7 +5,7 @@ var isWasm = (typeof(WebAssembly) !== "undefined");
 var isPoly = false;
 
 if (!isWasm) {
-	alert("WebAssembly is not supported in this browser, the page will not work !")
+    alert("WebAssembly is not supported in this browser, the page will not work !")
 }
 
 var audio_context = (isWebKitAudio) ? new webkitAudioContext() : new AudioContext();
@@ -38,7 +38,7 @@ function workletAvailable()
     return context.audioWorklet && typeof context.audioWorklet.addModule === 'function';
 }
 
-// Do no keep more than 10 alive DSP factories 
+// Do no keep more than 10 alive DSP factories
 function checkFactoryStack(factory)
 {
     if (factory && factory_stack.indexOf(factory) === -1) {
@@ -51,21 +51,21 @@ function checkFactoryStack(factory)
 
 function deleteDSP()
 {
-	if (DSP) {
-		if (audio_input) {
-			audio_input.disconnect(DSP);
-		}
-		DSP.disconnect(audio_context.destination);
-		if (isPoly) {
-			faust.deletePolyDSPInstance(DSP);
-		} else {
-			faust.deleteDSPInstance(DSP);
-		}
-		_f4u$t.hard_delete(faust_svg);
-
-		DSP = null;
-		faust_svg = null;
-	}
+    if (DSP) {
+        if (audio_input) {
+            audio_input.disconnect(DSP);
+        }
+        DSP.disconnect(audio_context.destination);
+        if (isPoly) {
+            faust.deletePolyDSPInstance(DSP);
+        } else {
+            faust.deleteDSPInstance(DSP);
+        }
+        _f4u$t.hard_delete(faust_svg);
+        
+        DSP = null;
+        faust_svg = null;
+    }
 }
 
 function activateDSP(dsp)
@@ -77,19 +77,19 @@ function activateDSP(dsp)
         } else {
             audio_input = null;
         }
-
+        
         // Setup UI
         faust_svg = $('#faustui');
         output_handler = _f4u$t.main(DSP.getJSON(), $(faust_svg), function(path, val) { DSP.setParamValue(path, val); });
         DSP.setOutputParamHandler(output_handler);
         DSP.connect(audio_context.destination);
-
+        
         console.log(DSP.getNumInputs());
         console.log(DSP.getNumOutputs());
-
+        
         loadDSPState();
     } else {
-      	alert(faust.getErrorMessage());
+        alert(faust.getErrorMessage());
         // Fix me
         document.getElementById('faustuiwrapper').style.display = 'none';
     }
@@ -102,7 +102,7 @@ function activateMonoDSP(dsp)
 
 function activatePolyDSP(dsp)
 {
-	activateDSP(dsp);
+    activateDSP(dsp);
     checkPolyphonicDSP(dsp.getJSON());
 }
 
@@ -138,48 +138,40 @@ function compilePolyDSP(factory)
 
 function compileDSP()
 {
-	deleteDSP();
-
-	// Prepare argv list
-	var argv = [];
-	argv.push("-ftz");
-	argv.push(ftz_flag);
-	argv.push("-I");
-	argv.push(libraries_url);
-	/*
-	// TODO : support for multiple library directories
-	argv.push("-I");
-	argv.push(base_url);
-	*/
-	console.log(argv);
-
-	if (poly_flag === "ON") {
-		isPoly = true;
-		console.log("Poly DSP");
-		// Create a poly DSP factory from the dsp code
-		faust.createPolyDSPFactory(dsp_code, argv, function(factory) { compilePolyDSP(factory); checkFactoryStack(factory); });
+    deleteDSP();
+    
+    // Prepare argv list
+    var argv = [];
+    argv.push("-ftz");
+    argv.push(ftz_flag);
+    argv.push("-I");
+    // Libraries are now included and loaded from the EMCC locale FS
+    argv.push("libraries");
+    console.log(argv);
+    
+    if (poly_flag === "ON") {
+        isPoly = true;
+        console.log("Poly DSP");
+        // Create a poly DSP factory from the dsp code
+        faust.createPolyDSPFactory(dsp_code, argv, function(factory) { compilePolyDSP(factory); checkFactoryStack(factory); });
     } else {
-		isPoly = false;
-		console.log("Mono DSP");
-		// Create a mono DSP factory from the dsp code
-		faust.createDSPFactory(dsp_code, argv, function(factory) { compileMonoDSP(factory); checkFactoryStack(factory); });
-	}
+        isPoly = false;
+        console.log("Mono DSP");
+        // Create a mono DSP factory from the dsp code
+        faust.createDSPFactory(dsp_code, argv, function(factory) { compileMonoDSP(factory); checkFactoryStack(factory); });
+    }
 }
 
 function expandDSP(dsp_code)
 {
-	// Prepare argv list
-	var argv = [];
-	argv.push("-ftz");
-	argv.push(ftz_flag);
-	argv.push("-I");
-	argv.push(libraries_url);
-	/*
-	// TODO : support for multiple library directories
-	argv.push("-I");
-	argv.push(base_url);
-	*/
-	console.log(argv);
-
-	return faust.expandDSP(dsp_code, argv);
+    // Prepare argv list
+    var argv = [];
+    argv.push("-ftz");
+    argv.push(ftz_flag);
+    argv.push("-I");
+    // Libraries are now included and loaded from the EMCC locale FS
+    argv.push("libraries");
+    console.log(argv);
+    
+    return faust.expandDSP(dsp_code, argv);
 }
