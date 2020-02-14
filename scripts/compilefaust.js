@@ -145,7 +145,7 @@ function compileDSP()
     argv.push("-ftz");
     argv.push(ftz_flag);
     argv.push("-I");
-    // Libraries are now included and loaded from the EMCC locale FS
+    // Libraries are now included and loaded from the EMCC locale FS included in libfaust
     argv.push("libraries");
     console.log(argv);
     
@@ -169,7 +169,7 @@ function expandDSP(dsp_code)
     argv.push("-ftz");
     argv.push(ftz_flag);
     argv.push("-I");
-    // Libraries are now included and loaded from the EMCC locale FS
+    // Libraries are now included and loaded from the EMCC locale FS included in libfaust
     argv.push("libraries");
     console.log(argv);
     
