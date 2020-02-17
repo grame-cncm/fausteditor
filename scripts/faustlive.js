@@ -377,7 +377,7 @@ function faustDocumentation() {
   }
   console.log('open documentation link for word', '"' + word + '"');
   window.open(
-    'libraries/doc/site/index.html#' + word.toLowerCase(), 'documentation');
+    'https://faustlibdoc.grame.fr/#' + word.toLowerCase(), 'documentation');
 }
 
 //-----------------------------------------------------------------------
