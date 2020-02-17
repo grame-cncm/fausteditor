@@ -29,7 +29,7 @@ function uploadOn(e, callback) {
 
   // CASE 1 : THE DROPPED OBJECT IS A URL TO SOME FAUST CODE
   if (e.dataTransfer.getData('URL') &&
-      e.dataTransfer.getData('URL').split(':').shift() != 'file') {
+    e.dataTransfer.getData('URL').split(':').shift() != 'file') {
     var url = e.dataTransfer.getData('URL');
 
     // Get base URL
@@ -43,13 +43,13 @@ function uploadOn(e, callback) {
     var xmlhttp = new XMLHttpRequest();
 
     xmlhttp.onreadystatechange =
-        function() {
-      if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
-        console.log('CASE 1');
-        dsp_code = xmlhttp.responseText;
-        callback();
+      function () {
+        if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+          console.log('CASE 1');
+          dsp_code = xmlhttp.responseText;
+          callback();
+        }
       }
-    }
 
     try {
       xmlhttp.open('GET', url, false);
@@ -98,7 +98,7 @@ function uploadOn(e, callback) {
           reader.readAsText(file);
         }
 
-        reader.onloadend = function(e) {
+        reader.onloadend = function (e) {
           dsp_code = reader.result;
           callback();
         };
@@ -137,7 +137,7 @@ function configureDropZone(zoneid) {
 function download(filename, text) {
   var element = document.createElement('a');
   element.setAttribute(
-      'href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    'href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
   element.setAttribute('download', filename);
 
   element.style.display = 'none';
@@ -166,7 +166,7 @@ function readSourceFile(evt) {
   }
   document.getElementById('filename').value = file.name;
   var reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = function (e) {
     var contents = e.target.result;
     codeEditor.setValue(contents);
   };
@@ -225,8 +225,8 @@ function configureEditorFromUrlParams() {
   var curl = params.get('code');
   if (curl) {
     console.log('code url is', curl);
-    fetch(curl, {'mode': 'cors'}).then(function(response) {
-      return response.text().then(function(text) {
+    fetch(curl, { 'mode': 'cors' }).then(function (response) {
+      return response.text().then(function (text) {
         codeEditor.setValue(text);
         // update the title with the name of the file
         var f1 = curl.lastIndexOf('/');
@@ -304,21 +304,21 @@ function stopFaustCode() {
 
 // Left-extend a position by 3 characters
 function back3ch(pos) {
-  return {'line': pos.line, 'ch': pos.ch - 3};
+  return { 'line': pos.line, 'ch': pos.ch - 3 };
 }
 
 // Test is a character is alpha numeric
 function isAlphaNumeric(code) {
   return (
-      (code > 47 && code < 58) ||  // numeric (0-9)
-      (code > 64 && code < 91) ||  // upper alpha (A-Z)
-      (code > 96 && code < 123));
+    (code > 47 && code < 58) ||  // numeric (0-9)
+    (code > 64 && code < 91) ||  // upper alpha (A-Z)
+    (code > 96 && code < 123));
 }
 
 // Test if a string is a two letters library prefix: 'xx.'
 function isLibPrefix(str) {
   return (str.length == 3) && isAlphaNumeric(str.charCodeAt(0)) &&
-      isAlphaNumeric(str.charCodeAt(1)) && (str.charCodeAt(2) == 46);
+    isAlphaNumeric(str.charCodeAt(1)) && (str.charCodeAt(2) == 46);
 }
 
 // Open the documentation for the function under the cursor,
@@ -340,6 +340,8 @@ function faustDocumentation() {
         // we have a prefix, we extend the word to search with the prefix
         console.log('a valid prefix found', '"' + prefix + '"');
         word = codeEditor.getRange(back3ch(pos.anchor), pos.head);
+        // we remove the . : xx.foo ==> xxfoo
+        word = word.slice(0, 2) + word.slice(3);
       } else {
         // no valid prefix, we keep the word as it is
         console.log('no valid prefix found', '"' + prefix + '"');
@@ -349,7 +351,7 @@ function faustDocumentation() {
       console.log('It seems that we are at the end of a word !');
       // try to find a word before and tart the whole process again
       const pos2 =
-          codeEditor.findWordAt({'line': curs.line, 'ch': curs.ch - 1});
+        codeEditor.findWordAt({ 'line': curs.line, 'ch': curs.ch - 1 });
       word = codeEditor.getRange(pos2.anchor, pos2.head);
       if (isAlphaNumeric(word.charCodeAt(0))) {
         // console.log("We are inside a word, left-extend 3 characters to get
@@ -359,6 +361,9 @@ function faustDocumentation() {
           // we have a prefix, we extend the word to search with the prefix
           console.log('a valid prefix found', '"' + prefix + '"');
           word = codeEditor.getRange(back3ch(pos2.anchor), pos2.head);
+          // we remove the '.'
+          word = word.slice(0, 2) + word.slide(3);
+
         } else {
           // no valid prefix, we keep the word as it is
           console.log('no valid prefix found', '"' + prefix + '"');
@@ -372,7 +377,7 @@ function faustDocumentation() {
   }
   console.log('open documentation link for word', '"' + word + '"');
   window.open(
-      'libraries/doc/library.html#' + word.toLowerCase(), 'documentation');
+    'libraries/doc/site/index.html#' + word.toLowerCase(), 'documentation');
 }
 
 //-----------------------------------------------------------------------
@@ -383,9 +388,9 @@ function openBlockDiagram() {
   if (expandDSP(codeEditor.getValue())) {
     console.log('open block diagram visualisation');
     getSHAKey(
-        document.getElementById('exportUrl').value,
-        document.getElementById('filename').value.split('.')[0],
-        codeEditor.getValue(), trigBlockDiagram, cancelLoader);
+      document.getElementById('exportUrl').value,
+      document.getElementById('filename').value.split('.')[0],
+      codeEditor.getValue(), trigBlockDiagram, cancelLoader);
   } else {
     alert(faust.getErrorMessage());
   }
@@ -394,13 +399,13 @@ function openBlockDiagram() {
 function trigBlockDiagram(key) {
   console.log('We got the key', key);
   console.log(
-      'the url is : ',
-      document.getElementById('exportUrl').value + '/' + key +
-          '/diagram/process.svg');
+    'the url is : ',
+    document.getElementById('exportUrl').value + '/' + key +
+    '/diagram/process.svg');
   window.open(
-      document.getElementById('exportUrl').value + '/' + key +
-          '/diagram/process.svg',
-      'blockdiagram');
+    document.getElementById('exportUrl').value + '/' + key +
+    '/diagram/process.svg',
+    'blockdiagram');
 }
 
 //-----------------------------------------------------------------------
@@ -441,31 +446,31 @@ function stopWaitingQrCode() {
 function trigCompilation(key) {
   console.log('trigCompilation ' + key);
   var plateform =
-      document.getElementById('Platform')
-          .options[document.getElementById('Platform').selectedIndex]
-          .value;
+    document.getElementById('Platform')
+      .options[document.getElementById('Platform').selectedIndex]
+      .value;
   var architecture =
-      document.getElementById('Architecture')
-          .options[document.getElementById('Architecture').selectedIndex]
-          .value;
+    document.getElementById('Architecture')
+      .options[document.getElementById('Architecture').selectedIndex]
+      .value;
 
   startWaitingQrCode();
 
   sendPrecompileRequest(
-      document.getElementById('exportUrl').value, key, plateform, architecture,
-      sha => {
-        stopWaitingQrCode();
-        updateQrCode(sha, document.getElementById('qrDiv'));
-      });
+    document.getElementById('exportUrl').value, key, plateform, architecture,
+    sha => {
+      stopWaitingQrCode();
+      updateQrCode(sha, document.getElementById('qrDiv'));
+    });
 }
 
 // exportFaustSource: send sourcecode to export URL : get back shakey and trig
 // compilation if success
 function exportFaustSource() {
   getSHAKey(
-      document.getElementById('exportUrl').value,
-      document.getElementById('filename').value.split('.')[0],
-      codeEditor.getValue(), trigCompilation, cancelLoader);
+    document.getElementById('exportUrl').value,
+    document.getElementById('filename').value.split('.')[0],
+    codeEditor.getValue(), trigCompilation, cancelLoader);
 
   /*
   console.log(expandDSP(codeEditor.getValue()));
@@ -496,24 +501,24 @@ function closeConfigDialog() {
 //-----------------------------------------------------------------------
 
 codeEditor.setOption(
-    'extraKeys', {'Ctrl-D': faustDocumentation, 'Ctrl-R': startStopFaustCode});
+  'extraKeys', { 'Ctrl-D': faustDocumentation, 'Ctrl-R': startStopFaustCode });
 
 // We want to show possible completions only when we type a character
-codeEditor.on('keyup', function(editor, event) {
+codeEditor.on('keyup', function (editor, event) {
   if (event.key.length == 1) {
     const ch = event.key[0];
     if (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z') {
-      CodeMirror.showHint(editor, null, {completeSingle: false});
+      CodeMirror.showHint(editor, null, { completeSingle: false });
     }
   }
 });
 
-tippy('.action-button', {theme: 'honeybee', arrow: true});
-tippy('.action-select', {theme: 'honeybee', arrow: true});
-tippy('.dropzone', {theme: 'honeybee', arrow: true})
+tippy('.action-button', { theme: 'honeybee', arrow: true });
+tippy('.action-select', { theme: 'honeybee', arrow: true });
+tippy('.dropzone', { theme: 'honeybee', arrow: true })
 
 // To activate audio on iOS
-window.addEventListener('touchstart', function() {
+window.addEventListener('touchstart', function () {
   // create empty buffer
   var buffer = audio_context.createBuffer(1, 1, 22050);
   var source = audio_context.createBufferSource();
@@ -539,7 +544,7 @@ function init() {
   configureEditorFromUrlParams();
 
   // No polling from the server needed, so use an empty loop
-  _f4u$t.main_loop = function() {}
+  _f4u$t.main_loop = function () { }
 
   // Configure editor
   configureDropZone('myDropZone');
@@ -548,7 +553,7 @@ function init() {
   if (!workletAvailable()) {
     document.getElementById('selectedRenderingMode').disabled = true;
     console.log(
-        'AudioWorklet is not supported, ScriptProcessor model only will be available');
+      'AudioWorklet is not supported, ScriptProcessor model only will be available');
   }
 
   // Activate MIDI
@@ -562,14 +567,14 @@ function init() {
 
   // Restore 'save DSP control parameters' checkbox state
   document.getElementById('dspstorage').checked =
-      (getStorageItemValue('FaustEditor', 'FaustDSPStorage') === 'on');
+    (getStorageItemValue('FaustEditor', 'FaustDSPStorage') === 'on');
 
   // Restore 'save DSP source' checkbox state
   document.getElementById('sourcestorage').checked =
-      (getStorageItemValue('FaustEditor', 'FaustSourceStorage') === 'on');
+    (getStorageItemValue('FaustEditor', 'FaustSourceStorage') === 'on');
 
   // Timer to save page and DSP state to local storage
-  setInterval(function() {
+  setInterval(function () {
     savePageState();
     if (DSP) {
       saveDSPState();
