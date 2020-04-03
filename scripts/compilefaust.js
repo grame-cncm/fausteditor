@@ -8,7 +8,8 @@ if (!isWasm) {
     alert("WebAssembly is not supported in this browser, the page will not work !")
 }
 
-var audio_context = (isWebKitAudio) ? new webkitAudioContext() : new AudioContext();
+var audio_context = (isWebKitAudio) ? new webkitAudioContext({ latencyHint: 0.00001 }) : new AudioContext({ latencyHint: 0.00001 });
+audio_context.destination.channelInterpretation = "discrete";
 var buffer_size = 1024;
 var audio_input = null;
 var midi_input = [];
