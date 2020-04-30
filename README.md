@@ -15,5 +15,5 @@ The recommended browsers are the latest versions of Firefox and Chrome. Chrome i
 
 ### Useful links
 
-- [https://faust.grame.fr/editor](https://fausteditor.grame.fr): the official link on the Faust website. 
-- [https://github.com/grame-cncm/fausteditorweb](https://github.com/grame-cncm/fausteditor): the github repository
+- [https://fausteditor.grame.fr](https://fausteditor.grame.fr): the official link on the Faust website. 
+- [https://github.com/grame-cncm/fausteditor](https://github.com/grame-cncm/fausteditor): the github repository
