@@ -86,7 +86,11 @@ var Faust;
                     this.fOutputHandler(item, this.getParamValue(item)); });
             }
         }
-        metadata(handler) { }
+        metadata(handler) {
+            if (this.fJSONDsp.meta) {
+                this.fJSONDsp.meta.forEach(meta => handler(Object.keys(meta)[0], meta[Object.keys(meta)[0]]));
+            }
+        }
         compute(input, output) {
             return false;
         }
@@ -126,7 +130,6 @@ var Faust;
             if (cmd === 14)
                 return this.pitchWheel(channel, (data2 * 128.0 + data1));
         }
-        ;
         ctrlChange(channel, ctrl, value) {
             if (this.fPlotHandler)
                 this.fCachedEvents.push({ type: "ctrlChange", data: [channel, ctrl, value] });
@@ -242,7 +245,7 @@ var Faust;
             }
             return true;
         }
-        metadata(handler) { }
+        metadata(handler) { super.metadata(handler); }
         getNumInputs() {
             return this.fInstance.api.getNumInputs(this.fDSP);
         }
@@ -284,7 +287,6 @@ var Faust;
             this.extractPaths(input_items, path_table);
         }
         static midiToFreq(note) { return 440.0 * Math.pow(2, ((note - 69) / 12)); }
-        ;
         extractPaths(input_items, path_table) {
             input_items.forEach((item) => {
                 if (item.endsWith("/gate")) {
@@ -403,7 +405,6 @@ var Faust;
             this.fVoiceTable[voice].fNote = DspVoice.kActiveVoice;
             return voice;
         }
-        ;
         getPlayingVoice(pitch) {
             let playing_voice = DspVoice.kNoVoice;
             let oldest_date_playing = Number.MAX_VALUE;
@@ -681,7 +682,11 @@ var Faust;
         compute(inputs, outputs) {
             return false;
         }
-        metadata(handler) { }
+        metadata(handler) {
+            if (this.fJSONDsp.meta) {
+                this.fJSONDsp.meta.forEach(meta => handler(Object.keys(meta)[0], meta[Object.keys(meta)[0]]));
+            }
+        }
         midiMessage(data) {
             const cmd = data[0] >> 4;
             const channel = data[0] & 0xf;
@@ -994,9 +999,9 @@ var Faust;
         deleteDSPFactory(factory) {
             this.fFaustEngine.deleteDSPFactory(factory.cfactory);
         }
-        expandDSP(name, dsp_code, args) {
+        expandDSP(dsp_code, args) {
             try {
-                return this.fFaustEngine.expandDSP(name, dsp_code, args);
+                return this.fFaustEngine.expandDSP("FaustDSP", dsp_code, args);
             }
             catch (_a) {
                 this.fErrorMessage = this.fFaustEngine.getErrorAfterException();

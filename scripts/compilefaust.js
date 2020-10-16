@@ -124,5 +124,5 @@ function expandDSP(dsp_code) {
     var argv = "-ftz " + ftz_flag.toString() + " -I libraries/";
     console.log(argv);
 
-    return faust.expandDSP("FaustDSP", dsp_code, argv);
+    return faust.expandDSP(dsp_code, argv);
 }
