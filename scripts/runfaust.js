@@ -246,9 +246,9 @@ function loadPageState() {
 }
 
 function checkPolyphonicDSP(json) {
-    if (!((json.indexOf("/freq") !== -1)
-        && (json.indexOf("/gain") !== -1)
-        && (json.indexOf("/gate") !== -1))) {
-        alert("Faust DSP code is not Polyphonic, it will probably not work correctly in this mode...");
+    if (!(((json.indexOf("/freq") !== -1) || (json.indexOf("/key") !== -1))
+        && (json.indexOf("/gate") !== -1)
+        && ((json.indexOf("/gain") !== -1) || (json.indexOf("/vel") !== -1) || (json.indexOf("/velocity") !== -1)))) {
+        alert("Faust DSP code is not Polyphonic, it will probably not work correctly in this mode...")
     }
 }

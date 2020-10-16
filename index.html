@@ -17,7 +17,6 @@
 	<link rel=stylesheet href="font-awesome/css/font-awesome.min.css">
 	<link rel=stylesheet href="tippy.css">
 	<link rel=stylesheet href="faust.css">
-
 </head>
 
 <body>
@@ -25,8 +24,7 @@
 	<div class="application">
 		<div class="logozone"><img src="faust-logo.png" width=58px alt="LOGO"></div>
 		<div class="actionzone">
-			<div role=button class="dynamic-button" id="run" title="(CTRL-R) Compile and run the Faust program"
-			 ">
+			<div role=button class="dynamic-button" id="run" title="(CTRL-R) Compile and run the Faust program">
 				<i class=" fa fa-play" aria-hidden="true"></i>
 			</div>
 
@@ -91,7 +89,6 @@ process = +;
 			<div id="exportButton" role=button class="export-button" onclick="exportFaustSource()">
 				Export
 			</div>
-
 			<div id="qrDiv">
 				<div id="loader">
 					<i class="fa fa-cog fa-spin fa-3x fa-fw"></i>
@@ -180,8 +177,8 @@ process = +;
 	<script src="scripts/tippy.min.js"></script>
 	<script src="scripts/localStorage.js"></script>
 	<script src="scripts/jsscripts.js"></script>
+	<script src="scripts/faustwebaudio.js"></script>
 	<script src="scripts/libfaust-wasm.js"></script>
-	<script src="scripts/webaudio-wasm-wrapper.js"></script>
 	<script src="scripts/compilefaust.js"></script>
 	<script src="scripts/runfaust.js"></script>
 	<script src="scripts/ExportLib.js"></script>

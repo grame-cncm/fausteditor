@@ -1,6 +1,11 @@
 /*
         A Faustlive like Web application.
 */
+
+// Global Faust context
+var faust = null;
+var fwan = null;
+
 var dsp_code = '';
 var base_url = '';
 
@@ -532,13 +537,23 @@ window.addEventListener('touchstart', function () {
 
 }, false);
 
+// On desktop
+window.addEventListener("mousedown", () => {
+    if (audio_context.state !== "suspended") return;
+    audio_context.resume().then(() => console.log("Audio resumed"))
+});
+
 //-----------------------------------------------------------------------
 // Initialization
 //-----------------------------------------------------------------------
 
 // Main entry point, called when libfaust.js has finished to load
-function init() {
-    console.log('FaustEditor: version 1.0.20');
+function init(instance) {
+    console.log('FaustEditor: version 1.0.21');
+
+    // Init Faust compiler and node generator
+    faust = Faust.createCompiler(Faust.createLibFaust(instance));
+    fwan = Faust.createAudioNodeFactory();
 
     // Try to load code from current URL
     configureEditorFromUrlParams();
@@ -587,5 +602,7 @@ function init() {
     activateButtons();
 }
 
-// Setup the main entry point in libfaust.js
-faust_module['onRuntimeInitialized'] = init;
+// Init Faust part
+FaustModule().then((instance) => { init(instance); });
+
+
