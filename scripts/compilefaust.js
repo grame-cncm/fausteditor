@@ -107,7 +107,7 @@ async function compileDSP() {
         isPoly = true;
         console.log("Poly DSP");
         // Create a poly DSP factory from the dsp code
-        DSP = await fwan.compilePolyNode(audio_context, "FaustDSP", faust, dsp_code, argv, poly_nvoices, (rendering_mode === "ScriptProcessor"), buffer_size);
+        DSP = await fwan.compilePolyNode(audio_context, "FaustDSP", faust, dsp_code, null, argv, poly_nvoices, (rendering_mode === "ScriptProcessor"), buffer_size);
         activatePolyDSP(DSP);
 
     } else {
