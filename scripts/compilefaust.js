@@ -107,14 +107,16 @@ async function compileDSP() {
         isPoly = true;
         console.log("Poly DSP");
         // Create a poly DSP factory from the dsp code
-        DSP = await fwan.compilePolyNode(audio_context, "FaustDSP", faust, dsp_code, null, argv, poly_nvoices, (rendering_mode === "ScriptProcessor"), buffer_size);
+        fwan = Faust.createPolyFactory();
+        DSP = await fwan.compileNode(audio_context, "FaustDSP", faust, dsp_code, null, argv, poly_nvoices, (rendering_mode === "ScriptProcessor"), buffer_size);
         activatePolyDSP(DSP);
 
     } else {
         isPoly = false;
         console.log("Mono DSP");
+        fwan = Faust.createMonoFactory();
         // Create a mono DSP factory from the dsp code
-        DSP = await fwan.compileMonoNode(audio_context, "FaustDSP", faust, dsp_code, argv, (rendering_mode === "ScriptProcessor"), buffer_size);
+        DSP = await fwan.compileNode(audio_context, "FaustDSP", faust, dsp_code, argv, (rendering_mode === "ScriptProcessor"), buffer_size);
         activateMonoDSP(DSP);
     }
 }

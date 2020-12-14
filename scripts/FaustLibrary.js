@@ -28,13 +28,10 @@ var Faust;
         module() { return this.fModule; }
         fs() { return this.fFileSystem; }
         getInfos(what) { return this.fCompiler.getInfos(what); }
-        toString() { return "LibFaust module: " + this.fModule + " engine: " + this.fCompiler; }
+        toString() { return "LibFaust module: " + this.fModule + " compiler: " + this.fCompiler; }
     }
     function createLibFaust(module) {
-        if (!module || (typeof (module) == 'undefined')) {
-            return null;
-        }
-        return new LibFaustImp(module);
+        return (!module || (typeof (module) == 'undefined')) ? null : new LibFaustImp(module);
     }
     Faust.createLibFaust = createLibFaust;
 })(Faust || (Faust = {}));
@@ -42,11 +39,11 @@ var Faust;
 (function (Faust) {
     function createFaustJSON(json) { return JSON.parse(json); }
     Faust.createFaustJSON = createFaustJSON;
-    function createCompiler(engine) { return new CompilerImp(engine); }
+    function createCompiler(libfaust) { return new CompilerImp(libfaust); }
     Faust.createCompiler = createCompiler;
     class CompilerImp {
-        constructor(engine) {
-            this.fFaustEngine = engine;
+        constructor(libfaust) {
+            this.fLibFaust = libfaust;
             this.fErrorMessage = "";
         }
         intVec2intArray(vec) {
@@ -68,10 +65,11 @@ var Faust;
                 }
                 else {
                     try {
-                        const faust_wasm = this.fFaustEngine.createDSPFactory(name, dsp_code, args, !poly);
+                        const faust_wasm = this.fLibFaust.createDSPFactory(name, dsp_code, args, !poly);
                         try {
-                            const module = yield WebAssembly.compile(this.intVec2intArray(faust_wasm.data));
-                            const factory = { cfactory: faust_wasm.cfactory, module: module, json: faust_wasm.json, poly: poly };
+                            const code = this.intVec2intArray(faust_wasm.data);
+                            const module = yield WebAssembly.compile(code);
+                            const factory = { cfactory: faust_wasm.cfactory, code: code, module: module, json: faust_wasm.json, poly: poly };
                             this.deleteDSPFactory(factory);
                             CompilerImp.gFactories.set(sha_key, factory);
                             return factory;
@@ -82,15 +80,15 @@ var Faust;
                         }
                     }
                     catch (_a) {
-                        this.fErrorMessage = this.fFaustEngine.getErrorAfterException();
+                        this.fErrorMessage = this.fLibFaust.getErrorAfterException();
                         console.error("=> exception raised while running createDSPFactory: " + this.fErrorMessage);
-                        this.fFaustEngine.cleanupAfterException();
+                        this.fLibFaust.cleanupAfterException();
                         return null;
                     }
                 }
             });
         }
-        version() { return this.fFaustEngine.version(); }
+        version() { return this.fLibFaust.version(); }
         getErrorMessage() { return this.fErrorMessage; }
         createMonoDSPFactory(name, dsp_code, args) {
             return __awaiter(this, void 0, void 0, function* () {
@@ -103,33 +101,33 @@ var Faust;
             });
         }
         deleteDSPFactory(factory) {
-            this.fFaustEngine.deleteDSPFactory(factory.cfactory);
+            this.fLibFaust.deleteDSPFactory(factory.cfactory);
             factory.cfactory = 0;
         }
         expandDSP(dsp_code, args) {
             try {
-                return this.fFaustEngine.expandDSP("FaustDSP", dsp_code, args);
+                return this.fLibFaust.expandDSP("FaustDSP", dsp_code, args);
             }
             catch (_a) {
-                this.fErrorMessage = this.fFaustEngine.getErrorAfterException();
+                this.fErrorMessage = this.fLibFaust.getErrorAfterException();
                 console.error("=> exception raised while running expandDSP: " + this.fErrorMessage);
-                this.fFaustEngine.cleanupAfterException();
+                this.fLibFaust.cleanupAfterException();
                 return null;
             }
         }
         generateAuxFiles(name, dsp_code, args) {
             try {
-                return this.fFaustEngine.generateAuxFiles(name, dsp_code, args);
+                return this.fLibFaust.generateAuxFiles(name, dsp_code, args);
             }
             catch (_a) {
-                this.fErrorMessage = this.fFaustEngine.getErrorAfterException();
+                this.fErrorMessage = this.fLibFaust.getErrorAfterException();
                 console.error("=> exception raised while running generateAuxFiles: " + this.fErrorMessage);
-                this.fFaustEngine.cleanupAfterException();
+                this.fLibFaust.cleanupAfterException();
                 return false;
             }
         }
         deleteAllDSPFactories() {
-            this.fFaustEngine.deleteAllDSPFactories();
+            this.fLibFaust.deleteAllDSPFactories();
         }
     }
     CompilerImp.gFactories = new Map();
@@ -238,7 +236,7 @@ var Faust;
                     const JSONDsp = Faust.createFaustJSON(json);
                     const c_options = JSONDsp.compile_options;
                     const poly = c_options.indexOf('wasm-e') !== -1;
-                    return { cfactory: 0, module: module, json: json, poly: poly };
+                    return { cfactory: 0, code: wasm_buffer, module: module, json: json, poly: poly };
                 }
                 catch (e) {
                     console.error("=> exception raised while running loadDSPFactory: " + e);
@@ -1409,16 +1407,21 @@ var Faust;
 })(Faust || (Faust = {}));
 var Faust;
 (function (Faust) {
-    function createAudioNodeFactory() { return new AudioNodeFactoryImp(); }
-    Faust.createAudioNodeFactory = createAudioNodeFactory;
-    class AudioNodeFactoryImp {
-        compileMonoNode(context, name, compiler, dsp_code, args, sp, buffer_size) {
+    function createMonoFactory() { return new MonoFactoryImp(); }
+    Faust.createMonoFactory = createMonoFactory;
+    function createPolyFactory() { return new PolyFactoryImp(); }
+    Faust.createPolyFactory = createPolyFactory;
+    class MonoFactoryImp {
+        constructor() {
+            this.fFactory = null;
+        }
+        compileNode(context, name, compiler, dsp_code, args, sp, buffer_size) {
             return __awaiter(this, void 0, void 0, function* () {
-                const factory = yield compiler.createMonoDSPFactory(name, dsp_code, args);
-                return (factory) ? this.createMonoNode(context, name, factory, sp, buffer_size) : null;
+                this.fFactory = yield compiler.createMonoDSPFactory(name, dsp_code, args);
+                return (this.fFactory) ? this.createNode(context, name, this.fFactory, sp, buffer_size) : null;
             });
         }
-        createMonoNode(context, name_aux, factory, sp, buffer_size) {
+        createNode(context, name_aux, factory, sp, buffer_size) {
             return __awaiter(this, void 0, void 0, function* () {
                 if (sp) {
                     buffer_size = (buffer_size) ? buffer_size : 1024;
@@ -1428,7 +1431,7 @@ var Faust;
                 }
                 else {
                     const name = name_aux + factory.cfactory.toString();
-                    if (!AudioNodeFactoryImp.gWorkletProcessors.has(name)) {
+                    if (!MonoFactoryImp.gWorkletProcessors.has(name)) {
                         try {
                             const processor_code = `
                             // Create a Faust namespace
@@ -1452,7 +1455,7 @@ var Faust;
                             (${Faust.FaustAudioWorkletProcessorGenerator.toString()})(); `;
                             const url = window.URL.createObjectURL(new Blob([processor_code], { type: "text/javascript" }));
                             yield context.audioWorklet.addModule(url);
-                            AudioNodeFactoryImp.gWorkletProcessors.add(name);
+                            MonoFactoryImp.gWorkletProcessors.add(name);
                         }
                         catch (e) {
                             console.error("=> exception raised while running createMonoNode: " + e);
@@ -1463,14 +1466,24 @@ var Faust;
                 }
             });
         }
-        createOfflineMonoProcessor(factory, sample_rate, buffer_size) {
+        createOfflineProcessor(factory, sample_rate, buffer_size) {
             return __awaiter(this, void 0, void 0, function* () {
                 const instance = yield Faust.createGenerator().createAsyncMonoDSPInstance(factory);
                 const mono_dsp = Faust.createMonoDSP(instance, sample_rate, buffer_size);
                 return new Faust.FaustOfflineProcessorImp(mono_dsp, buffer_size);
             });
         }
-        compilePolyNode(context, name, compiler, dsp_code, effect_code, args, voices, sp, buffer_size) {
+        getFactory() {
+            return this.fFactory;
+        }
+    }
+    MonoFactoryImp.gWorkletProcessors = new Set();
+    class PolyFactoryImp {
+        constructor() {
+            this.fVoiceFactory = null;
+            this.fEffectFactory = null;
+        }
+        compileNode(context, name, compiler, dsp_code, effect_code, args, voices, sp, buffer_size) {
             return __awaiter(this, void 0, void 0, function* () {
                 const voice_dsp = dsp_code;
                 const effect_dsp = effect_code ? effect_code :
@@ -1483,10 +1496,10 @@ var Faust;
                     return null;
                 const effect_factory = yield compiler.createPolyDSPFactory(name, effect_dsp, args);
                 const mixer_module = yield Faust.createGenerator().loadDSPMixer('/usr/rsrc/mixer32.wasm');
-                return (mixer_module) ? this.createPolyNode(context, name, voice_factory, mixer_module, voices, sp, ((effect_factory) ? effect_factory : undefined), buffer_size) : null;
+                return (mixer_module) ? this.createNode(context, name, voice_factory, mixer_module, voices, sp, ((effect_factory) ? effect_factory : undefined), buffer_size) : null;
             });
         }
-        createPolyNode(context, name_aux, voice_factory, mixer_module, voices, sp, effect_factory, buffer_size) {
+        createNode(context, name_aux, voice_factory, mixer_module, voices, sp, effect_factory, buffer_size) {
             return __awaiter(this, void 0, void 0, function* () {
                 if (sp) {
                     buffer_size = (buffer_size) ? buffer_size : 1024;
@@ -1496,7 +1509,7 @@ var Faust;
                 }
                 else {
                     const name = name_aux + voice_factory.cfactory.toString() + "_poly";
-                    if (!AudioNodeFactoryImp.gWorkletProcessors.has(name)) {
+                    if (!PolyFactoryImp.gWorkletProcessors.has(name)) {
                         try {
                             const processor_code = `
                             // Create a Faust namespace
@@ -1521,7 +1534,7 @@ var Faust;
                             (${Faust.FaustAudioWorkletProcessorGenerator.toString()})();`;
                             const url = window.URL.createObjectURL(new Blob([processor_code], { type: "text/javascript" }));
                             yield context.audioWorklet.addModule(url);
-                            AudioNodeFactoryImp.gWorkletProcessors.add(name);
+                            PolyFactoryImp.gWorkletProcessors.add(name);
                         }
                         catch (e) {
                             console.error("=> exception raised while running createPolyNode: " + e);
@@ -1532,8 +1545,14 @@ var Faust;
                 }
             });
         }
+        getVoiceFactory() {
+            return this.fVoiceFactory;
+        }
+        getEffectFactory() {
+            return this.fEffectFactory;
+        }
     }
-    AudioNodeFactoryImp.gWorkletProcessors = new Set();
+    PolyFactoryImp.gWorkletProcessors = new Set();
 })(Faust || (Faust = {}));
 var Faust;
 (function (Faust) {
@@ -1543,10 +1562,10 @@ var Faust;
         if (libfaust) {
             let compiler = Faust.createCompiler(libfaust);
             if (voices === 0) {
-                return Faust.createAudioNodeFactory().compileMonoNode(audioCtx, "FaustDSP", compiler, dsp_code, "-ftz 2", sp, 0);
+                return Faust.createMonoFactory().compileNode(audioCtx, "FaustDSP", compiler, dsp_code, "-ftz 2", sp, 0);
             }
             else {
-                return Faust.createAudioNodeFactory().compilePolyNode(audioCtx, "FaustDSP", compiler, dsp_code, effect_code, "-ftz 2", voices, sp, 0);
+                return Faust.createPolyFactory().compileNode(audioCtx, "FaustDSP", compiler, dsp_code, effect_code, "-ftz 2", voices, sp, 0);
             }
         }
         return new Promise(() => { return null; });
@@ -1564,21 +1583,21 @@ var Faust;
 })(Faust || (Faust = {}));
 var Faust;
 (function (Faust) {
-    function createSVGDiagrams(engine, name, dsp_code, args) {
-        return new SVGDiagramsImp(engine, name, dsp_code, args);
+    function createSVGDiagrams(libfaust, name, dsp_code, args) {
+        return new SVGDiagramsImp(libfaust, name, dsp_code, args);
     }
     Faust.createSVGDiagrams = createSVGDiagrams;
     class SVGDiagramsImp {
-        constructor(engine, name, dsp_code, args) {
-            this.fEngine = engine;
-            let compiler = Faust.createCompiler(engine);
+        constructor(libfaust, name, dsp_code, args) {
+            this.fLibFaust = libfaust;
+            let compiler = Faust.createCompiler(libfaust);
             this.fSuccess = compiler.generateAuxFiles(name, dsp_code, "-lang wasm -svg " + args);
             this.fError = (this.fSuccess) ? "" : compiler.getErrorMessage();
             this.fFolder = name + "-svg";
         }
         debug(path) {
             console.log("getSVG file: " + path);
-            let content = this.fEngine.module().FS.readdir(".");
+            let content = this.fLibFaust.module().FS.readdir(".");
             console.log("getSVG dir: " + content);
         }
         error() { return this.fError; }
@@ -1589,7 +1608,7 @@ var Faust;
             if (this.fSuccess) {
                 let path = name;
                 try {
-                    return this.fEngine.module().FS.readFile(path, { encoding: "utf8" });
+                    return this.fLibFaust.module().FS.readFile(path, { encoding: "utf8" });
                 }
                 catch (e) {
                     console.log("SVGDiagrams: can't read file " + path);
@@ -1656,13 +1675,13 @@ var Faust;
         }
         compileMonoWAPNode(context, name, compiler, dsp_code, args, sp, buffer_size) {
             return __awaiter(this, void 0, void 0, function* () {
-                const node = yield Faust.createAudioNodeFactory().compileMonoNode(context, name, compiler, dsp_code, args, sp, buffer_size);
+                const node = yield Faust.createMonoFactory().compileNode(context, name, compiler, dsp_code, args, sp, buffer_size);
                 return this.makeMonoWAP(node);
             });
         }
         createMonoWAPNode(context, name, factory, sp, buffer_size) {
             return __awaiter(this, void 0, void 0, function* () {
-                const node = yield Faust.createAudioNodeFactory().createMonoNode(context, name, factory, sp, buffer_size);
+                const node = yield Faust.createMonoFactory().createNode(context, name, factory, sp, buffer_size);
                 return this.makeMonoWAP(node);
             });
         }
@@ -1735,7 +1754,7 @@ var Faust;
         }
         createPolyWAPNode(context, name_aux, voice_factory, mixer_module, voices, sp, effect_factory, buffer_size) {
             return __awaiter(this, void 0, void 0, function* () {
-                const node = yield Faust.createAudioNodeFactory().createPolyNode(context, "FaustDSP", voice_factory, mixer_module, voices, sp, effect_factory, buffer_size);
+                const node = yield Faust.createPolyFactory().createNode(context, "FaustDSP", voice_factory, mixer_module, voices, sp, effect_factory, buffer_size);
                 return this.makePolyWAP(node);
             });
         }

@@ -553,7 +553,6 @@ function init(instance) {
 
     // Init Faust compiler and node generator
     faust = Faust.createCompiler(Faust.createLibFaust(instance));
-    fwan = Faust.createAudioNodeFactory();
 
     // Try to load code from current URL
     configureEditorFromUrlParams();
