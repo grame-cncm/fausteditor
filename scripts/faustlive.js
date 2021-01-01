@@ -4,6 +4,38 @@
 var dsp_code = '';
 var base_url = '';
 
+const docPath = 'https://faustlibraries.grame.fr/libs/';
+const docSections = {
+"an" : "analyzers",
+"ba" : "basics",
+"co" : "compressors",
+"de" : "delays",
+"dm" : "demos",
+"dx" : "dx7",
+"en" : "envelopes",
+"fi" : "filters",
+"ho" : "hoa",
+"it" : "interpolators",
+"ma" : "maths",
+"mi" : "mi",
+"ef" : "misceffects",
+"os" : "oscillators",
+"no" : "noises",
+"pf" : "phaflangers",
+"pm" : "physmodels",
+"qu" : "quantizer",
+"rm" : "reducemaps",
+"re" : "reverbs",
+"ro" : "routes",
+"si" : "signals",
+"so" : "soundfiles",
+"sp" : "spats",
+"sy" : "synths",
+"ve" : "vaeffects",
+"wd" : "wavedigitalfilters",
+"wa" : "webaudio"
+};
+
 var codeEditor = CodeMirror.fromTextArea(myTextarea, {
     lineNumbers: true,
     mode: 'application/faust',
@@ -326,6 +358,7 @@ function isLibPrefix(str) {
 function faustDocumentation() {
     // console.log("open Faust documentation");
     let word = codeEditor.getSelection();
+    let docURL = "unknown";
     if (word === '') {
         // we don't have a selection, therefore we try to figure out the function
         // name at the curseur position
@@ -342,6 +375,7 @@ function faustDocumentation() {
                 word = codeEditor.getRange(back3ch(pos.anchor), pos.head);
                 // we remove the . : xx.foo ==> xxfoo
                 word = word.slice(0, 2) + word.slice(3);
+                docURL = docPath + docSections[prefix.slice(0,2)] + '/#' + word.toLowerCase();
             } else {
                 // no valid prefix, we keep the word as it is
                 console.log('no valid prefix found', '"' + prefix + '"');
@@ -362,7 +396,8 @@ function faustDocumentation() {
                     console.log('a valid prefix found', '"' + prefix + '"');
                     word = codeEditor.getRange(back3ch(pos2.anchor), pos2.head);
                     // we remove the '.'
-                    word = word.slice(0, 2) + word.slide(3);
+                    word = word.slice(0, 2) + word.slice(3);
+                    docURL = docPath + docSections[prefix.slice(0,2)] + '/#' + word.toLowerCase();
 
                 } else {
                     // no valid prefix, we keep the word as it is
@@ -376,8 +411,9 @@ function faustDocumentation() {
         }
     }
     console.log('open documentation link for word', '"' + word + '"');
-    window.open(
-        'https://faustlibdoc.grame.fr/#' + word.toLowerCase(), 'documentation');
+    //let docURL = 'https://faustlibraries.grame.fr/libs/'+ docSections[prefix] + '/#' + word.toLowerCase();
+    console.log('docURL', '"' + docURL + '"');
+    window.open(docURL, 'documentation');
 }
 
 //-----------------------------------------------------------------------
