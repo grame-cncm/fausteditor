@@ -18,6 +18,7 @@ var DSP = null;
 var dsp_code = null;
 var faust_svg = null;
 var poly_flag = "OFF";
+var sample_format = "float";
 var ftz_flag = "2";
 var poly_nvoices = 16;
 var rendering_mode = "ScriptProcessor";
@@ -101,7 +102,14 @@ async function compileDSP() {
     deleteDSP();
 
     // Prepare argv list, libraries are now included and loaded from the EMCC locale FS included in libfaust
-    var argv = "-ftz " + ftz_flag.toString() + " -I libraries/";
+    var argv = null;
+    if (ftz_flag === "float") {
+        argv = "-ftz 2" + " -" + sample_format + " -I libraries/";
+    } else {
+        argv = "-ftz 1" + " -" + sample_format + " -I libraries/";
+    }
+
+    console.log(argv);
 
     if (poly_flag === "ON") {
         isPoly = true;

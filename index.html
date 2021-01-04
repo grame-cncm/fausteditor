@@ -112,6 +112,14 @@ process = +;
             <div class="config">
 
                 <div class="config-element">
+                    <H3>Sample format</H3>
+                    <form method="POST" name="menu">
+                        <select id="selectedSampleFormat" name="selectedSampleFormat"
+                            onChange="setSampleFormat(this.form.selectedSampleFormat)">
+                            <option selected value=float> float </option>
+                            <option value=double> double </option>
+                        </select>
+                    </form>
                     <H3>Buffer size</H3>
                     <form method="POST" name="menu">
                         <select id="selectedBuffer" name="selectedBuffer"
@@ -145,10 +153,9 @@ process = +;
                         </select>
                     </form>
                     <p>Assuming your DSP code is <a
-                            href="https://faust.grame.fr/news/2016/01/13/polyphonic-instruments.html ">polyphonic
+                            href="https://faustdoc.grame.fr/manual/midi/#midi-polyphony-support">polyphonic
                             ready</a>, you can activate the polyphonic mode, adjust the number of available voices, and
-                        test it with a MIDI
-                        device or application (usable with Chrome which implements the <a
+                        test it with a MIDI device or application (usable with Chrome which implements the <a
                             href="https://webaudio.github.io/web-midi-api/">Web
                             MIDI API</a>).
                 </div>
@@ -164,10 +171,8 @@ process = +;
                     </form>
                     <p>ScriptProcessor: audio rendering is done using the old ScriptProcessor model</p>
                     <p>AudioWorklet: audio rendering is done using the new AudioWorklet model. This can only be tested
-                        with Chrome
-                        Canary for now, be sure to <a
-                            href="https://googlechromelabs.github.io/web-audio-samples/audio-worklet/">activate
-                            it</a>
+                        with Chrome Canary for now, be sure to
+                        <a href="https://googlechromelabs.github.io/web-audio-samples/audio-worklet/">activate it</a>
                     <p>
                 </div>
                 <p> <input id="dspstorage" type="checkbox" onclick="setDSPStorage(checked)"> <B>Save DSP control

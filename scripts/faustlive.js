@@ -549,7 +549,7 @@ window.addEventListener("mousedown", () => {
 
 // Main entry point, called when libfaust.js has finished to load
 function init(instance) {
-    console.log('FaustEditor: version 1.0.21');
+    console.log('FaustEditor: version 1.0.22');
 
     // Init Faust compiler and node generator
     faust = Faust.createCompiler(Faust.createLibFaust(instance));

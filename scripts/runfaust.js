@@ -10,6 +10,11 @@ function setBufferSize(bs_item) {
     console.log("setBufferSize", buffer_size);
 }
 
+function setSampleFormat(sample_item) {
+    sample_format = sample_item.options[sample_item.selectedIndex].value;
+    console.log("setSampleFormat", sample_format);
+}
+
 function setPoly(poly_item) {
     poly_flag = poly_item.options[poly_item.selectedIndex].value;
     console.log("setPoly", poly_flag);
@@ -201,6 +206,7 @@ function savePageState() {
     if (getStorageItemValue('FaustEditor', 'FaustLocalStorage') === "on") {
         setStorageItemValue('FaustEditor', 'buffer_size', buffer_size);
         setStorageItemValue('FaustEditor', 'poly_flag', poly_flag);
+        setStorageItemValue('FaustEditor', 'sample_format', sample_format);
         setStorageItemValue('FaustEditor', 'ftz_flag', ftz_flag);
         setStorageItemValue('FaustEditor', 'poly_nvoices', poly_nvoices);
         setStorageItemValue('FaustEditor', 'rendering_mode', rendering_mode);
@@ -216,6 +222,7 @@ function restoreMenus() {
     // Restore menus
     restoreMenu("selectedBuffer", buffer_size);
     restoreMenu("selectedPoly", poly_flag);
+    restoreMenu("selectedSampleFormat", sample_format);
     restoreMenu("polyVoices", poly_nvoices);
     restoreMenu("selectedFTZ", ftz_flag);
     restoreMenu("selectedRenderingMode", rendering_mode);
@@ -232,6 +239,8 @@ function loadPageState() {
 
         buffer_size = (getStorageItemValue('FaustEditor', 'buffer_size') ? getStorageItemValue('FaustEditor', 'buffer_size') : 1024);
         poly_flag = (getStorageItemValue('FaustEditor', 'poly_flag') ? getStorageItemValue('FaustEditor', 'poly_flag') : "OFF");
+        sample_format = (getStorageItemValue('FaustEditor', 'sample_format') ? getStorageItemValue('FaustEditor', 'sample_format') : "float");
+
         poly_nvoices = (getStorageItemValue('FaustEditor', 'poly_nvoices') ? getStorageItemValue('FaustEditor', 'poly_nvoices') : 16);
         ftz_flag = (getStorageItemValue('FaustEditor', 'ftz_flag') ? getStorageItemValue('FaustEditor', 'ftz_flag') : 2);
         rendering_mode = (getStorageItemValue('FaustEditor', 'rendering_mode') ? getStorageItemValue('FaustEditor', 'rendering_mode') : "ScriptProcessor");
