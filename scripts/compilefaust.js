@@ -103,7 +103,7 @@ async function compileDSP() {
 
     // Prepare argv list, libraries are now included and loaded from the EMCC locale FS included in libfaust
     var argv = null;
-    if (ftz_flag === "float") {
+    if (sample_format === "float") {
         argv = "-ftz 2" + " -" + sample_format + " -I libraries/";
     } else {
         argv = "-ftz 1" + " -" + sample_format + " -I libraries/";
