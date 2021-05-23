@@ -6,34 +6,37 @@ var base_url = '';
 
 const docPath = 'https://faustlibraries.grame.fr/libs/';
 const docSections = {
-"an" : "analyzers",
-"ba" : "basics",
-"co" : "compressors",
-"de" : "delays",
-"dm" : "demos",
-"dx" : "dx7",
-"en" : "envelopes",
-"fi" : "filters",
-"ho" : "hoa",
-"it" : "interpolators",
-"ma" : "maths",
-"mi" : "mi",
-"ef" : "misceffects",
-"os" : "oscillators",
-"no" : "noises",
-"pf" : "phaflangers",
-"pm" : "physmodels",
-"qu" : "quantizer",
-"rm" : "reducemaps",
-"re" : "reverbs",
-"ro" : "routes",
-"si" : "signals",
-"so" : "soundfiles",
-"sp" : "spats",
-"sy" : "synths",
-"ve" : "vaeffects",
-"wd" : "wavedigitalfilters",
-"wa" : "webaudio"
+    "aa": "antialiased",
+    "an": "analyzers",
+    "ba": "basics",
+    "co": "compressors",
+    "de": "delays",
+    "dm": "demos",
+    "dx": "dx7",
+    "en": "envelopes",
+    "fd": "fds",
+    "fi": "filters",
+    "ho": "hoa",
+    "it": "interpolators",
+    "ma": "maths",
+    "mi": "mi",
+    "ef": "misceffects",
+    "os": "oscillators",
+    "no": "noises",
+    "pf": "phaflangers",
+    "pm": "physmodels",
+    "qu": "quantizers",
+    "rm": "reducemaps",
+    "re": "reverbs",
+    "ro": "routes",
+    "si": "signals",
+    "so": "soundfiles",
+    "sp": "spats",
+    "sy": "synths",
+    "ve": "vaeffects",
+    "vl": "version",
+    "wa": "webaudio",
+    "wd": "wdmodels"
 };
 
 var codeEditor = CodeMirror.fromTextArea(myTextarea, {
@@ -375,7 +378,7 @@ function faustDocumentation() {
                 word = codeEditor.getRange(back3ch(pos.anchor), pos.head);
                 // we remove the . : xx.foo ==> xxfoo
                 word = word.slice(0, 2) + word.slice(3);
-                docURL = docPath + docSections[prefix.slice(0,2)] + '/#' + word.toLowerCase();
+                docURL = docPath + docSections[prefix.slice(0, 2)] + '/#' + word.toLowerCase();
             } else {
                 // no valid prefix, we keep the word as it is
                 console.log('no valid prefix found', '"' + prefix + '"');
@@ -397,7 +400,7 @@ function faustDocumentation() {
                     word = codeEditor.getRange(back3ch(pos2.anchor), pos2.head);
                     // we remove the '.'
                     word = word.slice(0, 2) + word.slice(3);
-                    docURL = docPath + docSections[prefix.slice(0,2)] + '/#' + word.toLowerCase();
+                    docURL = docPath + docSections[prefix.slice(0, 2)] + '/#' + word.toLowerCase();
 
                 } else {
                     // no valid prefix, we keep the word as it is
