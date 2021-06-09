@@ -4,7 +4,6 @@
 
 // Global Faust context
 var faust = null;
-var fwan = null;
 
 var dsp_code = '';
 var base_url = '';
