@@ -77,6 +77,8 @@ function activateDSP(dsp) {
         output_handler = _f4u$t.main(DSP.getJSON(), $(faust_svg), function (path, val) { DSP.setParamValue(path, val); });
         DSP.setOutputParamHandler(output_handler);
         DSP.connect(audio_context.destination);
+        // DSP has to be explicitly started
+        DSP.start();
 
         console.log(DSP.getNumInputs());
         console.log(DSP.getNumOutputs());
