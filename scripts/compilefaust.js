@@ -1,7 +1,7 @@
 "use strict";
 
-var isWebKitAudio = (typeof(webkitAudioContext) !== "undefined");
-var isWasm = (typeof(WebAssembly) !== "undefined");
+var isWebKitAudio = (typeof (webkitAudioContext) !== "undefined");
+var isWasm = (typeof (WebAssembly) !== "undefined");
 var isPoly = false;
 
 if (!isWasm) {
@@ -10,6 +10,9 @@ if (!isWasm) {
 
 var audio_context = (isWebKitAudio) ? new webkitAudioContext({ latencyHint: 0.00001 }) : new AudioContext({ latencyHint: 0.00001 });
 audio_context.destination.channelInterpretation = "discrete";
+// To enable multi-channels inputs/outputs
+audio_context.destination.channelCount = audio_context.destination.maxChannelCount;
+
 var buffer_size = 1024;
 var audio_input = null;
 var midi_input = [];
@@ -32,16 +35,14 @@ if (qm > 0) {
 var libraries_url = wurl.substr(0, wurl.lastIndexOf('/')) + "/libraries/";
 console.log("URL:", libraries_url);
 
-function workletAvailable()
-{
+function workletAvailable() {
     if (typeof (OfflineAudioContext) === "undefined") return false;
     var context = new OfflineAudioContext(1, 1, 44100);
     return context.audioWorklet && typeof context.audioWorklet.addModule === 'function';
 }
 
 // Do no keep more than 10 alive DSP factories
-function checkFactoryStack(factory)
-{
+function checkFactoryStack(factory) {
     if (factory && factory_stack.indexOf(factory) === -1) {
         factory_stack.push(factory);
         if (factory_stack.length >= 10) {
@@ -50,8 +51,7 @@ function checkFactoryStack(factory)
     }
 }
 
-function deleteDSP()
-{
+function deleteDSP() {
     if (DSP) {
         if (audio_input) {
             audio_input.disconnect(DSP);
@@ -63,14 +63,13 @@ function deleteDSP()
             faust.deleteDSPInstance(DSP);
         }
         _f4u$t.hard_delete(faust_svg);
-        
+
         DSP = null;
         faust_svg = null;
     }
 }
 
-function activateDSP(dsp)
-{
+function activateDSP(dsp) {
     if (dsp) {
         DSP = dsp;
         if (DSP.getNumInputs() > 0) {
@@ -78,16 +77,16 @@ function activateDSP(dsp)
         } else {
             audio_input = null;
         }
-        
+
         // Setup UI
         faust_svg = $('#faustui');
-        output_handler = _f4u$t.main(DSP.getJSON(), $(faust_svg), function(path, val) { DSP.setParamValue(path, val); });
+        output_handler = _f4u$t.main(DSP.getJSON(), $(faust_svg), function (path, val) { DSP.setParamValue(path, val); });
         DSP.setOutputParamHandler(output_handler);
         DSP.connect(audio_context.destination);
-        
+
         console.log(DSP.getNumInputs());
         console.log(DSP.getNumOutputs());
-        
+
         loadDSPState();
     } else {
         alert(faust.getErrorMessage());
@@ -96,19 +95,16 @@ function activateDSP(dsp)
     }
 }
 
-function activateMonoDSP(dsp)
-{
+function activateMonoDSP(dsp) {
     activateDSP(dsp);
 }
 
-function activatePolyDSP(dsp)
-{
+function activatePolyDSP(dsp) {
     activateDSP(dsp);
     checkPolyphonicDSP(dsp.getJSON());
 }
 
-function compileMonoDSP(factory)
-{
+function compileMonoDSP(factory) {
     if (!factory) {
         alert(faust.getErrorMessage());
         // Fix me
@@ -122,8 +118,7 @@ function compileMonoDSP(factory)
     }
 }
 
-function compilePolyDSP(factory)
-{
+function compilePolyDSP(factory) {
     if (!factory) {
         alert(faust.getErrorMessage());
         // Fix me
@@ -137,10 +132,9 @@ function compilePolyDSP(factory)
     }
 }
 
-function compileDSP()
-{
+function compileDSP() {
     deleteDSP();
-    
+
     // Prepare argv list
     var argv = [];
     argv.push("-ftz");
@@ -149,22 +143,21 @@ function compileDSP()
     // Libraries are now included and loaded from the EMCC locale FS included in libfaust
     argv.push("libraries");
     console.log(argv);
-    
+
     if (poly_flag === "ON") {
         isPoly = true;
         console.log("Poly DSP");
         // Create a poly DSP factory from the dsp code
-        faust.createPolyDSPFactory(dsp_code, argv, function(factory) { compilePolyDSP(factory); checkFactoryStack(factory); });
+        faust.createPolyDSPFactory(dsp_code, argv, function (factory) { compilePolyDSP(factory); checkFactoryStack(factory); });
     } else {
         isPoly = false;
         console.log("Mono DSP");
         // Create a mono DSP factory from the dsp code
-        faust.createDSPFactory(dsp_code, argv, function(factory) { compileMonoDSP(factory); checkFactoryStack(factory); });
+        faust.createDSPFactory(dsp_code, argv, function (factory) { compileMonoDSP(factory); checkFactoryStack(factory); });
     }
 }
 
-function expandDSP(dsp_code)
-{
+function expandDSP(dsp_code) {
     // Prepare argv list
     var argv = [];
     argv.push("-ftz");
@@ -173,6 +166,6 @@ function expandDSP(dsp_code)
     // Libraries are now included and loaded from the EMCC locale FS included in libfaust
     argv.push("libraries");
     console.log(argv);
-    
+
     return faust.expandDSP(dsp_code, argv);
 }
