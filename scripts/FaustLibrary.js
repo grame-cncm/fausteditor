@@ -1442,12 +1442,14 @@ var Faust;
         }
         plot(size) {
             const plotted = new Array(this.fDSPCode.getNumOutputs()).fill(null).map(() => new Float32Array(size));
+            this.fDSPCode.start();
             for (let frame = 0; frame < size; frame += this.fBufferSize) {
                 this.fDSPCode.compute(this.fInputs, this.fOutputs);
                 for (let chan = 0; chan < plotted.length; chan++) {
                     plotted[chan].set(size - frame > this.fBufferSize ? this.fOutputs[chan] : this.fOutputs[chan].subarray(0, size - frame), frame);
                 }
             }
+            this.fDSPCode.stop();
             return plotted;
         }
     }
