@@ -71,6 +71,7 @@ var Faust;
                             const module = yield WebAssembly.compile(code);
                             const factory = { cfactory: faust_wasm.cfactory, code: code, module: module, json: faust_wasm.json, poly: poly };
                             this.deleteDSPFactory(factory);
+                            faust_wasm.data.delete();
                             CompilerImp.gFactories.set(sha_key, factory);
                             return factory;
                         }
