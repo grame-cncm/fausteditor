@@ -300,6 +300,7 @@ function isFaustCodeRunning() {
 
 // Run the Faust Code
 function runFaustCode() {
+    audio_context.resume();
     dsp_code = codeEditor.getValue();
     console.log('run faust code : ', dsp_code);
 
@@ -577,7 +578,7 @@ window.addEventListener('touchstart', function () {
 
 // Main entry point, called when libfaust.js has finished to load
 function init() {
-    console.log('FaustEditor: version 1.0.23');
+    console.log('FaustEditor: version 1.0.24');
 
     // Try to load code from current URL
     configureEditorFromUrlParams();
@@ -627,4 +628,20 @@ function init() {
 }
 
 // Setup the main entry point in libfaust.js
-faust_module['onRuntimeInitialized'] = init;
+(async () => {
+    const {
+        instantiateFaustModuleFromFile,
+        FaustCompiler,
+        FaustMonoDspGenerator,
+        FaustPolyDspGenerator,
+        LibFaust
+    } = await import("./faustwasm/index.js");
+    // Init Faust compiler and node factory 
+    const module = await instantiateFaustModuleFromFile(new URL("./scripts/libfaust-wasm.js", location.href).href);
+    // const module = await instantiateFaustModule();
+    const libFaust = new LibFaust(module);
+    faust_compiler = new FaustCompiler(libFaust);
+    faust_mono_factory = new FaustMonoDspGenerator();
+    faust_poly_factory = new FaustPolyDspGenerator();
+    init();
+})();
