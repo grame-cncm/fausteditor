@@ -42,6 +42,7 @@ function workletAvailable() {
 }
 
 // Do no keep more than 10 alive DSP factories
+/*
 function checkFactoryStack(factory) {
     if (factory && factory_stack.indexOf(factory) === -1) {
         factory_stack.push(factory);
@@ -50,18 +51,14 @@ function checkFactoryStack(factory) {
         }
     }
 }
-
+*/
 function deleteDSP() {
     if (DSP) {
         if (audio_input) {
             audio_input.disconnect(DSP);
         }
         DSP.disconnect(audio_context.destination);
-        if (isPoly) {
-            faust.deletePolyDSPInstance(DSP);
-        } else {
-            faust.deleteDSPInstance(DSP);
-        }
+        DSP.destroy();
         _f4u$t.hard_delete(faust_svg);
 
         DSP = null;
@@ -80,7 +77,7 @@ function activateDSP(dsp) {
 
         // Setup UI
         faust_svg = $('#faustui');
-        output_handler = _f4u$t.main(DSP.getJSON(), $(faust_svg), function (path, val) { DSP.setParamValue(path, val); });
+        output_handler = _f4u$t.main(DSP.getJSON(), $(faust_svg), function (path, val) { DSP.setParamValue(path, +val); });
         DSP.setOutputParamHandler(output_handler);
         DSP.connect(audio_context.destination);
 
@@ -89,7 +86,7 @@ function activateDSP(dsp) {
 
         loadDSPState();
     } else {
-        alert(faust.getErrorMessage());
+        alert(faust_compiler.getErrorMessage());
         // Fix me
         document.getElementById('faustuiwrapper').style.display = 'none';
     }
@@ -104,56 +101,74 @@ function activatePolyDSP(dsp) {
     checkPolyphonicDSP(dsp.getJSON());
 }
 
-function compileMonoDSP(factory) {
+async function compileMonoDSP(factory) {
     if (!factory) {
-        alert(faust.getErrorMessage());
+        alert('Faust DSP Factory not compiled');
         // Fix me
         document.getElementById('faustuiwrapper').style.display = 'none';
     } else if (rendering_mode === "ScriptProcessor") {
         console.log("ScriptProcessor createDSPInstance");
-        faust.createDSPInstance(factory, audio_context, buffer_size, activateMonoDSP);
+        const node = await faust_mono_factory.createNode(audio_context, "FaustDSP", factory, true, buffer_size);
+        activateMonoDSP(node);
     } else {
         console.log("Worklet createDSPWorkletInstance");
-        faust.createDSPWorkletInstance(factory, audio_context, activateMonoDSP);
+        const node = await faust_mono_factory.createNode(audio_context, "FaustDSP", factory);
+        activateMonoDSP(node);
     }
 }
 
-function compilePolyDSP(factory) {
-    if (!factory) {
-        alert(faust.getErrorMessage());
+async function compilePolyDSP(voiceFactory, effectFactory) {
+    if (!voiceFactory) {
+        alert('Faust DSP Factory not compiled');
         // Fix me
         document.getElementById('faustuiwrapper').style.display = 'none';
     } else if (rendering_mode === "ScriptProcessor") {
         console.log("ScriptProcessor createPolyDSPInstance");
-        faust.createPolyDSPInstance(factory, audio_context, buffer_size, poly_nvoices, activatePolyDSP);
+        const node = await faust_poly_factory.createNode(audio_context, poly_nvoices, "FaustDSP", voiceFactory, undefined, effectFactory, true, buffer_size);
+        activatePolyDSP(node);
     } else {
         console.log("Worklet createPolyDSPWorkletInstance");
-        faust.createPolyDSPWorkletInstance(factory, audio_context, poly_nvoices, activatePolyDSP);
+        const node = await faust_poly_factory.createNode(audio_context, poly_nvoices, "FaustDSP", voiceFactory, undefined, effectFactory);
+        activatePolyDSP(node);
     }
 }
 
-function compileDSP() {
+async function compileDSP() {
     deleteDSP();
 
     // Prepare argv list
     var argv = [];
     argv.push("-ftz");
     argv.push(ftz_flag);
-    argv.push("-I");
+    // argv.push("-I");
     // Libraries are now included and loaded from the EMCC locale FS included in libfaust
-    argv.push("libraries");
+    // argv.push("libraries");
     console.log(argv);
 
     if (poly_flag === "ON") {
         isPoly = true;
         console.log("Poly DSP");
         // Create a poly DSP factory from the dsp code
-        faust.createPolyDSPFactory(dsp_code, argv, function (factory) { compilePolyDSP(factory); checkFactoryStack(factory); });
+        try {
+            const { voiceFactory, effectFactory } = await faust_poly_factory.compile(faust_compiler, "FaustDSP", dsp_code, argv.join(" "));
+            compilePolyDSP(voiceFactory, effectFactory)
+        } catch (error) {
+            alert(error);
+            // Fix me
+            document.getElementById('faustuiwrapper').style.display = 'none';
+        }
     } else {
         isPoly = false;
         console.log("Mono DSP");
         // Create a mono DSP factory from the dsp code
-        faust.createDSPFactory(dsp_code, argv, function (factory) { compileMonoDSP(factory); checkFactoryStack(factory); });
+        try {
+            const { factory } = await faust_mono_factory.compile(faust_compiler, "FaustDSP", dsp_code, argv.join(" "));
+            compileMonoDSP(factory);
+        } catch (error) {
+            alert(error);
+            // Fix me
+            document.getElementById('faustuiwrapper').style.display = 'none';
+        }
     }
 }
 
@@ -162,10 +177,10 @@ function expandDSP(dsp_code) {
     var argv = [];
     argv.push("-ftz");
     argv.push(ftz_flag);
-    argv.push("-I");
+    // argv.push("-I");
     // Libraries are now included and loaded from the EMCC locale FS included in libfaust
-    argv.push("libraries");
+    // argv.push("libraries");
     console.log(argv);
 
-    return faust.expandDSP(dsp_code, argv);
+    return faust_compiler.expandDSP(dsp_code, argv.join(" "));
 }
