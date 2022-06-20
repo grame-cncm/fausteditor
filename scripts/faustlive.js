@@ -356,60 +356,55 @@ function isLibPrefix(str) {
         isAlphaNumeric(str.charCodeAt(1)) && (str.charCodeAt(2) == 46);
 }
 
+function buildDocURL(word, pos) {
+    // console.log("We are inside a word, left-extend 3 characters
+    // to get the prefix 'xx.'");
+    const prefix = codeEditor.getRange(back3ch(pos.anchor), pos.anchor);
+    if (isLibPrefix(prefix)) {
+        // we have a prefix, we extend the word to search with the prefix
+        console.log('a valid prefix found', '"' + prefix + '"');
+        word = codeEditor.getRange(back3ch(pos.anchor), pos.head);
+        // we remove the . : xx.foo ==> xxfoo
+        word = word.slice(0, 2) + word.slice(3);
+        return docPath + docSections[prefix.slice(0, 2)] + '/#' + word.toLowerCase();
+    } else {
+        // no valid prefix, we keep the word as it is
+        console.log('no valid prefix found', '"' + prefix + '"');
+        return docPath;
+    }
+}
+
 // Open the documentation for the function under the cursor,
 // handle special case at the end of a word.
 function faustDocumentation() {
     // console.log("open Faust documentation");
     let word = codeEditor.getSelection();
+    // Default URL is the librairies 
     let docURL = docPath;
+    let pos;
     if (word === '') {
-        // we don't have a selection, therefore we try to figure out the function
-        // name at the curseur position
+        // We don't have a selection, therefore we try to figure 
+        // out the function name at the curseur position
         const curs = codeEditor.getCursor();
-        const pos = codeEditor.findWordAt(curs);
+        pos = codeEditor.findWordAt(curs);
         word = codeEditor.getRange(pos.anchor, pos.head);
         if (isAlphaNumeric(word.charCodeAt(0))) {
-            // console.log("We are inside a word, left-extend 3 characters to get the
-            // prefix 'xx.'");
-            const prefix = codeEditor.getRange(back3ch(pos.anchor), pos.anchor);
-            if (isLibPrefix(prefix)) {
-                // we have a prefix, we extend the word to search with the prefix
-                console.log('a valid prefix found', '"' + prefix + '"');
-                word = codeEditor.getRange(back3ch(pos.anchor), pos.head);
-                // we remove the . : xx.foo ==> xxfoo
-                word = word.slice(0, 2) + word.slice(3);
-                docURL = docPath + docSections[prefix.slice(0, 2)] + '/#' + word.toLowerCase();
-            } else {
-                // no valid prefix, we keep the word as it is
-                console.log('no valid prefix found', '"' + prefix + '"');
-            }
+            docURL = buildDocURL(word, pos);
         } else {
             console.log('It seems that we are at the end of a word !');
             // try to find a word before and start the whole process again
-            const pos2 = codeEditor.findWordAt({ 'line': curs.line, 'ch': curs.ch - 1 });
-            word = codeEditor.getRange(pos2.anchor, pos2.head);
+            pos = codeEditor.findWordAt({ 'line': curs.line, 'ch': curs.ch - 1 });
+            word = codeEditor.getRange(pos.anchor, pos.head);
             if (isAlphaNumeric(word.charCodeAt(0))) {
-                // console.log("We are inside a word, left-extend 3 characters to get
-                // the prefix 'xx.'");
-                const prefix = codeEditor.getRange(back3ch(pos2.anchor), pos2.anchor);
-                if (isLibPrefix(prefix)) {
-                    // we have a prefix, we extend the word to search with the prefix
-                    console.log('a valid prefix found', '"' + prefix + '"');
-                    word = codeEditor.getRange(back3ch(pos2.anchor), pos2.head);
-                    // we remove the '.'
-                    word = word.slice(0, 2) + word.slice(3);
-                    docURL = docPath + docSections[prefix.slice(0, 2)] + '/#' + word.toLowerCase();
-
-                } else {
-                    // no valid prefix, we keep the word as it is
-                    console.log('no valid prefix found', '"' + prefix + '"');
-                }
-            } else {
-                // console.log("We are still not inside a word, we give up");
-                word = '';
+                docURL = buildDocURL(word, pos);
             }
         }
+    } else {
+        // We have a selection
+        pos = codeEditor.listSelections()[0];
+        docURL = buildDocURL(word, pos);
     }
+
     console.log('open documentation link for word', '"' + word + '"');
     console.log('docURL', '"' + docURL + '"');
     window.open(docURL, 'documentation');
