@@ -361,7 +361,7 @@ function isLibPrefix(str) {
 function faustDocumentation() {
     // console.log("open Faust documentation");
     let word = codeEditor.getSelection();
-    let docURL = "unknown";
+    let docURL = docPath;
     if (word === '') {
         // we don't have a selection, therefore we try to figure out the function
         // name at the curseur position
@@ -383,12 +383,10 @@ function faustDocumentation() {
                 // no valid prefix, we keep the word as it is
                 console.log('no valid prefix found', '"' + prefix + '"');
             }
-
         } else {
             console.log('It seems that we are at the end of a word !');
-            // try to find a word before and tart the whole process again
-            const pos2 =
-                codeEditor.findWordAt({ 'line': curs.line, 'ch': curs.ch - 1 });
+            // try to find a word before and start the whole process again
+            const pos2 = codeEditor.findWordAt({ 'line': curs.line, 'ch': curs.ch - 1 });
             word = codeEditor.getRange(pos2.anchor, pos2.head);
             if (isAlphaNumeric(word.charCodeAt(0))) {
                 // console.log("We are inside a word, left-extend 3 characters to get
@@ -406,7 +404,6 @@ function faustDocumentation() {
                     // no valid prefix, we keep the word as it is
                     console.log('no valid prefix found', '"' + prefix + '"');
                 }
-
             } else {
                 // console.log("We are still not inside a word, we give up");
                 word = '';
@@ -414,7 +411,6 @@ function faustDocumentation() {
         }
     }
     console.log('open documentation link for word', '"' + word + '"');
-    //let docURL = 'https://faustlibraries.grame.fr/libs/'+ docSections[prefix] + '/#' + word.toLowerCase();
     console.log('docURL', '"' + docURL + '"');
     window.open(docURL, 'documentation');
 }
@@ -577,7 +573,7 @@ window.addEventListener('touchstart', function () {
 
 // Main entry point, called when libfaust.js has finished to load
 function init() {
-    console.log('FaustEditor: version 1.0.23');
+    console.log('FaustEditor: version 1.0.24');
 
     // Try to load code from current URL
     configureEditorFromUrlParams();
