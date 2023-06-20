@@ -581,10 +581,10 @@ const init = async () => {
         FaustMonoDspGenerator,
         FaustPolyDspGenerator,
         LibFaust
-    } = await import("./faustwasm/index.js");
-    FaustUI = (await import("./faust-ui/index.js")).FaustUI;
+    } = await import("@shren/faustwasm");
+    FaustUI = (await import("@shren/faust-ui")).FaustUI;
     // Init Faust compiler and node factory 
-    const module = await instantiateFaustModuleFromFile(new URL("./scripts/libfaust-wasm.js", location.href).href);
+    const module = await instantiateFaustModuleFromFile("../node_modules/@shren/faustwasm/libfaust-wasm/libfaust-wasm.js");
     // const module = await instantiateFaustModule();
     const libFaust = new LibFaust(module);
     faust_compiler = new FaustCompiler(libFaust);
