@@ -1,0 +1,23 @@
+{
+  "name": "fausteditor",
+  "version": "1.0.25",
+  "description": "A simple Faust editor for the web",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/grame-cncm/fausteditor.git"
+  },
+  "keywords": [
+    "faust",
+    "editor"
+  ],
+  "author": "GRAME",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/grame-cncm/fausteditor/issues"
+  },
+  "homepage": "https://github.com/grame-cncm/fausteditor#readme"
+}
