@@ -1,7 +1,19 @@
 /*
         A Faustlive like Web application.
 */
-var dsp_code = '';
+import CodeMirror from "codemirror";
+import "codemirror/mode/clike/clike";
+import "../codemirror/mode/faust/faust.js";
+import "../codemirror/mode/faust/faustsnippets.js";
+import "codemirror/addon/edit/matchbrackets";
+import "codemirror/addon/edit/closebrackets";
+import "codemirror/addon/dialog/dialog";
+import "codemirror/addon/search/search";
+import "codemirror/addon/hint/show-hint";
+import "../codemirror/addon/hint/anyword-hint"; // customized
+import "../codemirror/addon/hint/faust-hint";
+
+// var dsp_code = '';
 var base_url = '';
 
 const docPath = 'https://faustlibraries.grame.fr/libs/';
@@ -41,7 +53,7 @@ const docSections = {
 
 var codeEditor = CodeMirror.fromTextArea(myTextarea, {
     lineNumbers: true,
-    mode: 'application/faust',
+    mode: 'faust',
     smartIndent: true,
     tabSize: 4,
     theme: 'eclipse',
@@ -630,8 +642,10 @@ function init() {
     // Init Faust compiler and node factory 
     const module = await instantiateFaustModuleFromFile("../node_modules/@shren/faustwasm/libfaust-wasm/libfaust-wasm.js");
     const libFaust = new LibFaust(module);
-    faust_compiler = new FaustCompiler(libFaust);
-    faust_mono_factory = new FaustMonoDspGenerator();
-    faust_poly_factory = new FaustPolyDspGenerator();
+    window.faust_compiler = new FaustCompiler(libFaust);
+    window.faust_mono_factory = new FaustMonoDspGenerator();
+    window.faust_poly_factory = new FaustPolyDspGenerator();
     init();
 })();
+
+Object.assign(window, { closeConfigDialog, closeExportDialog, exportFaustSource, stopFaustCode })

@@ -19,3 +19,4 @@ for (var i = 0; i < gFaustLibSnippetsArray.length; i++) {
     gFaustLibSnippetsArray[i].sort();
 }
 
+Object.assign(window, { gFaustKeyWords, gFaustLibSnippetsArray });

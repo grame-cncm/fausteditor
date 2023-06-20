@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@shren/faust-ui": "^1.1.2",
-    "@shren/faustwasm": "^0.0.25"
+    "@shren/faustwasm": "^0.0.25",
+    "codemirror": "^5.29.0"
   }
 }
