@@ -140,8 +140,8 @@
 
 	.faustui {
 		margin:20px 40px 40px 40px;
-		width: calc(100%-80px);
-		height: calc(100%-80px);
+		width: calc(100% - 80px);
+		height: calc(100% - 80px);
 	}
 
 /* Close Button used to stop the running Faust code */
@@ -167,7 +167,7 @@
 		margin-top:100px;
 		padding:20px;
 		width: 250px;
-		height: calc(100%-80px);
+		height: calc(100% - 80px);
 		background-color:white;
 		box-shadow: 3px 3px 5px 0px rgba(75, 81, 122, 0.46);
 	}
@@ -197,7 +197,7 @@
 		margin-top:100px;
 		padding:20px;
 		width: 80%;
-		height: calc(100%-80px);
+		height: calc(100% - 80px);
 		background-color:white;
 		box-shadow: 3px 3px 5px 0px rgba(75, 81, 122, 0.46);
 	}

@@ -89,7 +89,7 @@ rect.faust-hslider-meter {
 
 rect.faust-vslider-groove,
 rect.faust-hslider-groove {
-	//fill : #FCE4EC;
+	/*fill : #FCE4EC;*/
 	fill : black;
 }
 
@@ -104,8 +104,8 @@ rect.faust-hbargraph-curtain {
 	stroke : black;
 }
 
-// hbargraph meters cannot be defined via CSS because their widths and
-// heights are dynamic
+/* hbargraph meters cannot be defined via CSS because their widths and
+ * heights are dynamic */
 
 rect.faust-hbargraph-meter {
 	fill : url(#horizontalBarGraphMeterGradient);
@@ -152,7 +152,7 @@ rect.faust-tgroup-box {
 }
 
 circle.faust-rbutton-groove {
-	//fill : rgba(233, 30, 101, 0.63);
+	/*fill : rgba(233, 30, 101, 0.63);*/
 	fill : url(#rotatingButtonHandleGradient);
 	stroke : rgb(233, 30, 101);
 }
@@ -170,7 +170,7 @@ path.faust-rbutton-mgroove {
 	fill : #F48FB1;
 }
 
-// as all of the above rectangles could be implemented as paths, we duplicate the definitions for paths
+/* as all of the above rectangles could be implemented as paths, we duplicate the definitions for paths */
 
 path.faust-hslider-groove {
 	fill : red;
