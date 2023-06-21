@@ -13,13 +13,16 @@ import "codemirror/addon/hint/show-hint";
 import "../codemirror/addon/hint/anyword-hint"; // customized
 import "../codemirror/addon/hint/faust-hint";
 
+import tippy from "tippy.js";
+import "tippy.js/dist/tippy.css";
+
 import { deleteQrCode, updateQrCode, cancelLoader } from "./exportUI";
 import { getSHAKey, sendPrecompileRequest } from "./ExportLib";
 import { activateMIDIInput, loadPageState, restoreMenus, saveDSPState, savePageState, setLocalStorage } from "./runfaust";
 import { audio_context, compileDSP, deleteDSP, DSP, workletAvailable } from "./compilefaust";
 
 export var dsp_code = '';
-var base_url = '';
+var base_url = ''; // TODO(ijc): unused?
 
 const docPath = 'https://faustlibraries.grame.fr/libs/';
 const docSections = {
@@ -560,9 +563,19 @@ codeEditor.on('keyup', function (editor, event) {
     }
 });
 
-tippy('.action-button', { theme: 'honeybee', arrow: true });
-tippy('.action-select', { theme: 'honeybee', arrow: true });
-tippy('.dropzone', { theme: 'honeybee', arrow: true })
+const tippyOptions = {
+    theme: "honeybee",
+    arrow: true,
+    content(reference) {
+        const title = reference.getAttribute('title');
+        reference.removeAttribute('title');
+        return title;
+    },
+}
+
+for (const className of ["action-button", "action-select", "dropzone"]) {
+    tippy(`.${className}`, tippyOptions)
+}
 
 // To activate audio on iOS
 window.addEventListener('touchstart', function () {
