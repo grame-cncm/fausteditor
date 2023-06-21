@@ -1,4 +1,4 @@
-"use strict";
+import { getArchitectures, getPlatforms, getQrCode, getTargets } from "./ExportLib";
 
 export function onEnterKey(event) {
     if (!event) {
@@ -54,7 +54,7 @@ function forgeURL() {
     return document.getElementById("exportUrl").value + "/" + sha + "/" + plateform + "/" + architecture + "/" + output;
 }
 
-export function updateQrCode(sha, div) {
+export async function updateQrCode(sha, div) {
     deleteQrCode(div);
 
     var plateform = document.getElementById("Platform").options[document.getElementById("Platform").selectedIndex].value;
@@ -65,7 +65,7 @@ export function updateQrCode(sha, div) {
     link.href = document.getElementById("exportUrl").value + "/" + sha + "/" +
         plateform + "/" + architecture + "/" + output;
 
-    var myWhiteDiv = getQrCode(document.getElementById("exportUrl").value, sha, plateform, architecture, output, 130);
+    var myWhiteDiv = await getQrCode(document.getElementById("exportUrl").value, sha, plateform, architecture, output, 130);
 
     div.appendChild(link);
     link.appendChild(myWhiteDiv);

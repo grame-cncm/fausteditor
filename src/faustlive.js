@@ -13,7 +13,8 @@ import "codemirror/addon/hint/show-hint";
 import "../codemirror/addon/hint/anyword-hint"; // customized
 import "../codemirror/addon/hint/faust-hint";
 
-import { updateQrCode, cancelLoader } from "./exportUI";
+import { deleteQrCode, updateQrCode, cancelLoader } from "./exportUI";
+import { getSHAKey, sendPrecompileRequest } from "./ExportLib";
 
 // var dsp_code = '';
 var base_url = '';

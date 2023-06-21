@@ -167,11 +167,13 @@ process = +;</textarea>
 
 	<script src="src/compilefaust.js"></script>
 	<script src="src/runfaust.js"></script>
-	<script src="src/ExportLib.js"></script>
-	<script src="src/qrcode.js"></script>
 	<script type="module">
 		import { changeArchs, deleteQrCode, onEnterKey } from "./src/exportUI";
 		import { closeConfigDialog, closeExportDialog, exportFaustSource, stopFaustCode } from "./src/faustlive";
+		Object.assign(window, {
+		  changeArchs, deleteQrCode, onEnterKey,
+		  closeConfigDialog, closeExportDialog, exportFaustSource, stopFaustCode,
+		})
 	</script>
 </body>
 

@@ -1,4 +1,4 @@
-"use strict";
+import QRCode from "qrcode";
 
 /************************************************************
  ***************** Interface to FaustWeb *********************
@@ -11,7 +11,7 @@
 // @return : the available targets as a JSON application
 // json = {"platform1":["arch1", "arch2", ..., "archn"], ... , "platformn":["arch1", "arch2", ..., "archn"]}
 
-function getTargets(exportUrl, callback, errCallback) {
+export function getTargets(exportUrl, callback, errCallback) {
     var getrequest = new XMLHttpRequest();
 
     getrequest.onreadystatechange = function () {
@@ -34,7 +34,7 @@ function getTargets(exportUrl, callback, errCallback) {
 // @callback : function called once request succeeded
 // @errCallback : function called once request failed
 // @return : the sha key corresponding to source_code
-function getSHAKey(exportUrl, name, source_code, callback, errCallback) {
+export function getSHAKey(exportUrl, name, source_code, callback, errCallback) {
     var filename = name + ".dsp";
     var file = new File([source_code], filename);
     var newRequest = new XMLHttpRequest();
@@ -60,7 +60,7 @@ function getSHAKey(exportUrl, name, source_code, callback, errCallback) {
 // @platform/architecture : platform/architecture to precompile
 // @callback : function called once request succeeded
 // @return : @param : the sha key
-function sendPrecompileRequest(exportUrl, sha, platform, architecture, callback) {
+export function sendPrecompileRequest(exportUrl, sha, platform, architecture, callback) {
     var getrequest = new XMLHttpRequest();
 
     getrequest.onreadystatechange = function () {
@@ -82,29 +82,26 @@ function sendPrecompileRequest(exportUrl, sha, platform, architecture, callback)
 // @sha : sha key of DSP
 // @platform/architecture/target : platform/architecture/target compiled
 // @cote : width and height of the returned QrCode
-function getQrCode(url, sha, plateform, architecture, target, size) {
+export async function getQrCode(url, sha, plateform, architecture, target, size) {
     var downloadString = url + "/" + sha + "/" + plateform + "/" + architecture + "/" + target;
     var whiteContainer = document.createElement('div');
     whiteContainer.style.cssText = "width:" + size.toString() + "px; height:" +
         size.toString() +
         "px; background-color:white; position:relative; margin-left:auto; margin-right:auto; padding:3px;";
+    whiteContainer.title = downloadString;
 
-    var qqDiv = document.createElement('qrcode');
-    var qq = new QRCode(qqDiv, {
-        text: downloadString,
-        width: size,
-        height: size,
-        colorDark: "#000000",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.H
-    });
+    var qq = document.createElement('img');
+    qq.width = qq.height = size;
+    qq.style = "display: block";
+    qq.alt = "Scan me!"
+    qq.src = await QRCode.toDataURL(downloadString, { errorCorrectionLevel: "H" });
 
-    whiteContainer.appendChild(qqDiv);
+    whiteContainer.appendChild(qq);
     return whiteContainer;
 }
 
 // Return the array of available platforms from the json description
-function getPlatforms(json) {
+export function getPlatforms(json) {
     var platforms = [];
     var data = JSON.parse(json);
     var index = 0;
@@ -116,7 +113,7 @@ function getPlatforms(json) {
 }
 
 // Return the list of available architectures for a specific platform from the json description
-function getArchitectures(json, platform) {
+export function getArchitectures(json, platform) {
     var data = JSON.parse(json);
     return data[platform];
 }
