@@ -1,6 +1,6 @@
 "use strict";
 
-function onEnterKey(event) {
+export function onEnterKey(event) {
     if (!event) {
         var event = window.event;
     }
@@ -35,7 +35,7 @@ function closeExport(event) {
     }
 }
 
-function deleteQrCode(div) {
+export function deleteQrCode(div) {
     if (div !== undefined) {
         for (var i = div.children.length - 1; i >= 0; i--) {
             if (div.children[i].id != "loader") {
@@ -45,6 +45,7 @@ function deleteQrCode(div) {
     }
 }
 
+// TODO: Looks like this is unused.
 function forgeURL() {
     const plateform = document.getElementById("Platform").options[document.getElementById("Platform").selectedIndex].value;
     const architecture = document.getElementById("Architecture").options[document.getElementById("Architecture").selectedIndex].value;
@@ -53,7 +54,7 @@ function forgeURL() {
     return document.getElementById("exportUrl").value + "/" + sha + "/" + plateform + "/" + architecture + "/" + output;
 }
 
-function updateQrCode(sha, div) {
+export function updateQrCode(sha, div) {
     deleteQrCode(div);
 
     var plateform = document.getElementById("Platform").options[document.getElementById("Platform").selectedIndex].value;
@@ -70,7 +71,7 @@ function updateQrCode(sha, div) {
     link.appendChild(myWhiteDiv);
 }
 
-function cancelLoader() {
+export function cancelLoader() {
     document.getElementById("loader").style.visibility = "hidden";
 }
 
@@ -80,7 +81,7 @@ function cleanComboBox(id) {
     }
 }
 
-function changeArchs() {
+export function changeArchs() {
     // Clean combobox before adding new options
     cleanComboBox("Architecture");
     deleteQrCode(document.getElementById("qrDiv"));

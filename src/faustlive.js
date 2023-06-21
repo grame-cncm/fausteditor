@@ -13,6 +13,8 @@ import "codemirror/addon/hint/show-hint";
 import "../codemirror/addon/hint/anyword-hint"; // customized
 import "../codemirror/addon/hint/faust-hint";
 
+import { updateQrCode, cancelLoader } from "./exportUI";
+
 // var dsp_code = '';
 var base_url = '';
 
@@ -335,7 +337,7 @@ function activateButtons() {
 }
 
 // Stop the currently running Faust code
-function stopFaustCode() {
+export function stopFaustCode() {
     console.log('stop faust code');
 
     // Delete the UI content in the DOM
@@ -467,7 +469,7 @@ function openExportDialog() {
     }
 }
 
-function closeExportDialog() {
+export function closeExportDialog() {
     console.log('close Export Dialog');
     document.getElementById('exportwrapper').style.display = 'none';
 }
@@ -508,7 +510,7 @@ function trigCompilation(key) {
 
 // exportFaustSource: send sourcecode to export URL : get back shakey and trig
 // compilation if success
-function exportFaustSource() {
+export function exportFaustSource() {
     getSHAKey(
         document.getElementById('exportUrl').value,
         document.getElementById('filename').value.split('.')[0],
@@ -533,7 +535,7 @@ function openConfigDialog() {
     document.getElementById('configwrapper').style.display = 'block';
 }
 
-function closeConfigDialog() {
+export function closeConfigDialog() {
     console.log('Close Configuration Dialog');
     document.getElementById('configwrapper').style.display = 'none';
 }
@@ -646,5 +648,3 @@ function init() {
     window.faust_poly_factory = new FaustPolyDspGenerator();
     init();
 })();
-
-Object.assign(window, { closeConfigDialog, closeExportDialog, exportFaustSource, stopFaustCode })
