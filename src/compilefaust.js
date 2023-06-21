@@ -1,4 +1,5 @@
-"use strict";
+import { dsp_code } from "./faustlive";
+import { activateAudioInput, audio_input, buffer_size, checkPolyphonicDSP, ftz_flag, loadDSPState, poly_flag, poly_nvoices, rendering_mode } from "./runfaust";
 
 var isWebKitAudio = (typeof (webkitAudioContext) !== "undefined");
 var isWasm = (typeof (WebAssembly) !== "undefined");
@@ -8,23 +9,16 @@ if (!isWasm) {
     alert("WebAssembly is not supported in this browser, the page will not work !")
 }
 
-var audio_context = (isWebKitAudio) ? new webkitAudioContext({ latencyHint: 0.00001 }) : new AudioContext({ latencyHint: 0.00001 });
+export var audio_context = (isWebKitAudio) ? new webkitAudioContext({ latencyHint: 0.00001 }) : new AudioContext({ latencyHint: 0.00001 });
 audio_context.destination.channelInterpretation = "discrete";
 // To enable multi-channels inputs/outputs
 audio_context.destination.channelCount = audio_context.destination.maxChannelCount;
 
-var buffer_size = 1024;
-var audio_input = null;
+export var DSP = null;
+export var output_handler = null;
 var midi_input = [];
 var factory_stack = [];
-var DSP = null;
-var dsp_code = null;
 var faust_svg = null;
-var poly_flag = "OFF";
-var ftz_flag = "2";
-var poly_nvoices = 16;
-var rendering_mode = "ScriptProcessor";
-var output_handler = null;
 
 // compute libraries URL relative to current page
 var wurl = window.location.href;
@@ -35,7 +29,7 @@ if (qm > 0) {
 var libraries_url = wurl.substr(0, wurl.lastIndexOf('/')) + "/libraries/";
 console.log("URL:", libraries_url);
 
-function workletAvailable() {
+export function workletAvailable() {
     if (typeof (OfflineAudioContext) === "undefined") return false;
     var context = new OfflineAudioContext(1, 1, 44100);
     return context.audioWorklet && typeof context.audioWorklet.addModule === 'function';
@@ -52,7 +46,7 @@ function checkFactoryStack(factory) {
     }
 }
 */
-function deleteDSP() {
+export function deleteDSP() {
     if (DSP) {
         if (audio_input) {
             audio_input.disconnect(DSP);
@@ -133,7 +127,7 @@ async function compilePolyDSP(voiceFactory, effectFactory) {
     }
 }
 
-async function compileDSP() {
+export async function compileDSP() {
     deleteDSP();
 
     // Prepare argv list

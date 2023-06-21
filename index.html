@@ -164,15 +164,14 @@ process = +;</textarea>
 	<script src="src/tippy.min.js"></script>
 	<script src="src/localStorage.js"></script>
 	<script src="src/jsscripts.js"></script>
-
-	<script src="src/compilefaust.js"></script>
-	<script src="src/runfaust.js"></script>
 	<script type="module">
 		import { changeArchs, deleteQrCode, onEnterKey } from "./src/exportUI";
-		import { closeConfigDialog, closeExportDialog, exportFaustSource, stopFaustCode } from "./src/faustlive";
+		import { openConfigDialog, closeConfigDialog, closeExportDialog, exportFaustSource, stopFaustCode } from "./src/faustlive";
+		import { setBufferSize, setPoly, setPolyVoices, setRenderingMode } from "./src/runfaust";
 		Object.assign(window, {
 		  changeArchs, deleteQrCode, onEnterKey,
-		  closeConfigDialog, closeExportDialog, exportFaustSource, stopFaustCode,
+		  openConfigDialog, closeConfigDialog, closeExportDialog, exportFaustSource, stopFaustCode,
+		  setBufferSize, setPoly, setPolyVoices, setRenderingMode,
 		})
 	</script>
 </body>

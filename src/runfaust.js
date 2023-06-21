@@ -1,6 +1,13 @@
-'use strict';
+import { audio_context, DSP, output_handler } from "./compilefaust";
 
-function setBufferSize(bs_item) {
+export var buffer_size = 1024;
+export var audio_input = null;
+export var poly_flag = "OFF";
+export var ftz_flag = "2";
+export var poly_nvoices = 16;
+export var rendering_mode = "ScriptProcessor";
+
+export function setBufferSize(bs_item) {
     buffer_size = parseInt(bs_item.options[bs_item.selectedIndex].value);
     if (buffer_size === 128 && rendering_mode === "ScriptProcessor") {
         console.log("buffer_size cannot be set to 128 in ScriptProcessor mode !");
@@ -10,21 +17,22 @@ function setBufferSize(bs_item) {
     console.log("setBufferSize", buffer_size);
 }
 
-function setPoly(poly_item) {
+export function setPoly(poly_item) {
     poly_flag = poly_item.options[poly_item.selectedIndex].value;
     console.log("setPoly", poly_flag);
 }
 
-function setPolyVoices(voices_item) {
+export function setPolyVoices(voices_item) {
     poly_nvoices = voices_item.options[voices_item.selectedIndex].value;
     console.log("setPolyVoices", poly_nvoices);
 }
 
+// TODO(ijc): Unused?
 function setFTZ(ftz_item) {
     ftz_flag = ftz_item.options[ftz_item.selectedIndex].value;
 }
 
-function setRenderingMode(rendering_item) {
+export function setRenderingMode(rendering_item) {
     rendering_mode = rendering_item.options[rendering_item.selectedIndex].value;
     if (rendering_mode === "AudioWorklet") {
         console.log("setRenderingMode AudioWorklet");
@@ -105,7 +113,7 @@ function onsuccesscallbackStandard(access) {
     }
 }
 
-function activateMIDIInput() {
+export function activateMIDIInput() {
     console.log("activateMIDIInput");
     if (typeof (navigator.requestMIDIAccess) !== "undefined") {
         navigator.requestMIDIAccess().then(onsuccesscallbackStandard, onerrorcallback);
@@ -117,7 +125,7 @@ function activateMIDIInput() {
 }
 
 // Audio input handling
-function activateAudioInput() {
+export function activateAudioInput() {
     console.log("activateAudioInput");
     if (!navigator.getUserMedia) {
         navigator.getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
@@ -146,7 +154,7 @@ function getDevice(device) {
 
 // Save/Load functions using local storage
 
-function setLocalStorage(state) {
+export function setLocalStorage(state) {
     console.log(state);
     setStorageItemValue('FaustEditor', 'FaustLocalStorage', ((state) ? "on" : "off"));
 }
@@ -173,7 +181,7 @@ function restoreMenu(id, value) {
     }
 }
 
-function saveDSPState() {
+export function saveDSPState() {
     if (getStorageItemValue('FaustEditor', 'FaustDSPStorage') === "on") {
         var params = DSP.getParams();
         for (var i = 0; i < params.length; i++) {
@@ -182,7 +190,7 @@ function saveDSPState() {
     }
 }
 
-function loadDSPState() {
+export function loadDSPState() {
     if (getStorageItemValue('FaustEditor', 'FaustDSPStorage') === "on") {
         var params = DSP.getParams();
         for (var i = 0; i < params.length; i++) {
@@ -197,7 +205,7 @@ function loadDSPState() {
     }
 }
 
-function savePageState() {
+export function savePageState() {
     if (getStorageItemValue('FaustEditor', 'FaustLocalStorage') === "on") {
         setStorageItemValue('FaustEditor', 'buffer_size', buffer_size);
         setStorageItemValue('FaustEditor', 'poly_flag', poly_flag);
@@ -212,7 +220,7 @@ function savePageState() {
     }
 }
 
-function restoreMenus() {
+export function restoreMenus() {
     // Restore menus
     restoreMenu("selectedBuffer", buffer_size);
     restoreMenu("selectedPoly", poly_flag);
@@ -227,7 +235,7 @@ function restoreMenus() {
     }
 }
 
-function loadPageState() {
+export function loadPageState() {
     if (getStorageItemValue('FaustEditor', 'FaustLocalStorage') === "on") {
 
         buffer_size = (getStorageItemValue('FaustEditor', 'buffer_size') ? getStorageItemValue('FaustEditor', 'buffer_size') : 1024);
@@ -245,7 +253,7 @@ function loadPageState() {
     }
 }
 
-function checkPolyphonicDSP(json) {
+export function checkPolyphonicDSP(json) {
     if (!((json.indexOf("/freq") !== -1)
         && (json.indexOf("/gain") !== -1)
         && (json.indexOf("/gate") !== -1))) {

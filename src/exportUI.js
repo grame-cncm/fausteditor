@@ -45,7 +45,7 @@ export function deleteQrCode(div) {
     }
 }
 
-// TODO: Looks like this is unused.
+// TODO(ijc): Looks like this is unused.
 function forgeURL() {
     const plateform = document.getElementById("Platform").options[document.getElementById("Platform").selectedIndex].value;
     const architecture = document.getElementById("Architecture").options[document.getElementById("Architecture").selectedIndex].value;

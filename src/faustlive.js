@@ -15,8 +15,10 @@ import "../codemirror/addon/hint/faust-hint";
 
 import { deleteQrCode, updateQrCode, cancelLoader } from "./exportUI";
 import { getSHAKey, sendPrecompileRequest } from "./ExportLib";
+import { activateMIDIInput, loadPageState, restoreMenus, saveDSPState, savePageState, setLocalStorage } from "./runfaust";
+import { audio_context, compileDSP, deleteDSP, DSP, workletAvailable } from "./compilefaust";
 
-// var dsp_code = '';
+export var dsp_code = '';
 var base_url = '';
 
 const docPath = 'https://faustlibraries.grame.fr/libs/';
@@ -531,7 +533,7 @@ export function exportFaustSource() {
 // Config Dialog
 //-----------------------------------------------------------------------
 
-function openConfigDialog() {
+export function openConfigDialog() {
     console.log('Open Configuration Dialog');
     document.getElementById('configwrapper').style.display = 'block';
 }
