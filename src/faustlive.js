@@ -264,8 +264,7 @@ function configureEditorFromUrlParams() {
     var inlinecode = params.get('inline');
     if (inlinecode) {
         console.log('inline code is', inlinecode);
-        var inlinetext = base64_decode(inlinecode + '===');
-        codeEditor.setValue(inlinetext);
+        codeEditor.setValue(atob(inlinecode));
     }
 
     // set editor content from url
