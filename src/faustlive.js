@@ -20,6 +20,7 @@ import { deleteQrCode, updateQrCode, cancelLoader } from "./exportUI";
 import { getSHAKey, sendPrecompileRequest } from "./ExportLib";
 import { activateMIDIInput, loadPageState, restoreMenus, saveDSPState, savePageState, setLocalStorage } from "./runfaust";
 import { audio_context, compileDSP, deleteDSP, DSP, workletAvailable } from "./compilefaust";
+import { getStorageItemValue } from "./localStorage"
 
 export var dsp_code = '';
 var base_url = ''; // TODO(ijc): unused?

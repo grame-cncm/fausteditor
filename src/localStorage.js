@@ -1,7 +1,5 @@
-'use strict';
-
 //set item from local storage 'item_key' key
-function getStorageItemValue(item_key, key) {
+export function getStorageItemValue(item_key, key) {
     if (localStorage.getItem(item_key)) {
         var item_value = JSON.parse(localStorage.getItem(item_key));
         var item_index = item_value.findIndex((obj => obj[0] === key));
@@ -12,7 +10,7 @@ function getStorageItemValue(item_key, key) {
 }
 
 //get [key, value] in local storage item_key key
-function setStorageItemValue(item_key, key, value) {
+export function setStorageItemValue(item_key, key, value) {
     var item_value;
     if (localStorage.getItem(item_key)) {
         item_value = JSON.parse(localStorage.getItem(item_key));
@@ -33,6 +31,7 @@ function setStorageItemValue(item_key, key, value) {
 }
 
 //get value of 'item_key'
+// TODO(ijc): Unused?
 function getStorageItem(item_key) {
     return (localStorage.getItem(item_key)) ? JSON.parse(localStorage.getItem(item_key)) : null;
 }
