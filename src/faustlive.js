@@ -3,15 +3,17 @@
 */
 import CodeMirror from "codemirror";
 import "codemirror/mode/clike/clike";
-import "../codemirror/mode/faust/faust.js";
-import "../codemirror/mode/faust/faustsnippets.js";
+import "./codemirror/mode/faust/faust.js";
+import "./codemirror/mode/faust/faustsnippets.js";
 import "codemirror/addon/edit/matchbrackets";
 import "codemirror/addon/edit/closebrackets";
 import "codemirror/addon/dialog/dialog";
 import "codemirror/addon/search/search";
 import "codemirror/addon/hint/show-hint";
-import "../codemirror/addon/hint/anyword-hint"; // customized
-import "../codemirror/addon/hint/faust-hint";
+import "./codemirror/addon/hint/anyword-hint"; // customized
+import "./codemirror/addon/hint/faust-hint";
+
+import "codemirror/";
 
 import jsURL from "@shren/faustwasm/libfaust-wasm/libfaust-wasm.js?url"
 import dataURL from "@shren/faustwasm/libfaust-wasm/libfaust-wasm.data?url"

@@ -67,7 +67,7 @@ function activateDSP(dsp) {
         if (DSP.getNumInputs() > 0) {
             activateAudioInput();
         } else {
-            resetAudioinput();
+            resetAudioInput();
         }
 
         // Setup UI
