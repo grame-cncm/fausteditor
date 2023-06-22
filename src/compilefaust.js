@@ -1,5 +1,6 @@
 import { dsp_code } from "./faustlive";
-import { activateAudioInput, audio_input, buffer_size, checkPolyphonicDSP, ftz_flag, loadDSPState, poly_flag, poly_nvoices, rendering_mode } from "./runfaust";
+import { activateAudioInput, audio_input, buffer_size, checkPolyphonicDSP, ftz_flag, loadDSPState, poly_flag, poly_nvoices, rendering_mode, resetAudioInput } from "./runfaust";
+import { _f4u$t } from "./jsscripts"
 
 var isWebKitAudio = (typeof (webkitAudioContext) !== "undefined");
 var isWasm = (typeof (WebAssembly) !== "undefined");
@@ -66,7 +67,7 @@ function activateDSP(dsp) {
         if (DSP.getNumInputs() > 0) {
             activateAudioInput();
         } else {
-            audio_input = null;
+            resetAudioinput();
         }
 
         // Setup UI

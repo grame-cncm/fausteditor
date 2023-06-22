@@ -13,6 +13,10 @@ import "codemirror/addon/hint/show-hint";
 import "../codemirror/addon/hint/anyword-hint"; // customized
 import "../codemirror/addon/hint/faust-hint";
 
+import jsURL from "@shren/faustwasm/libfaust-wasm/libfaust-wasm.js?url"
+import dataURL from "@shren/faustwasm/libfaust-wasm/libfaust-wasm.data?url"
+import wasmURL from "@shren/faustwasm/libfaust-wasm/libfaust-wasm.wasm?url"
+
 import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
 
@@ -21,6 +25,7 @@ import { getSHAKey, sendPrecompileRequest } from "./ExportLib";
 import { activateMIDIInput, loadPageState, restoreMenus, saveDSPState, savePageState, setLocalStorage } from "./runfaust";
 import { audio_context, compileDSP, deleteDSP, DSP, workletAvailable } from "./compilefaust";
 import { getStorageItemValue } from "./localStorage"
+import { _f4u$t } from "./jsscripts"
 
 export var dsp_code = '';
 var base_url = ''; // TODO(ijc): unused?
@@ -604,9 +609,6 @@ function init() {
     // Try to load code from current URL
     configureEditorFromUrlParams();
 
-    // No polling from the server needed, so use an empty loop
-    _f4u$t.main_loop = function () { }
-
     // Configure editor
     configureDropZone('myDropZone');
 
@@ -658,7 +660,7 @@ function init() {
         LibFaust
     } = await import("@shren/faustwasm");
     // Init Faust compiler and node factory 
-    const module = await instantiateFaustModuleFromFile("../node_modules/@shren/faustwasm/libfaust-wasm/libfaust-wasm.js");
+    const module = await instantiateFaustModuleFromFile(jsURL, dataURL, wasmURL);
     const libFaust = new LibFaust(module);
     window.faust_compiler = new FaustCompiler(libFaust);
     window.faust_mono_factory = new FaustMonoDspGenerator();

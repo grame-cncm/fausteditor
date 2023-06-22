@@ -142,7 +142,7 @@ static methods.
 @class _f4u$t
 @static
 **/
-var _f4u$t = {};
+export var _f4u$t = {};
 
 /**
 Estimation of text height in layout computations.
@@ -5165,7 +5165,7 @@ _f4u$t.server_update_function = function(address, value) {
 _f4u$t.dispatch = function(data) {
   var lines = data.toString().split('\n');
   var limit = lines.length;
-  for (i=0; i < limit; i++) {
+  for (let i=0; i < limit; i++) {
     var values = lines[i].toString().split(' ');
     if (values.length > 1) {
       var address = values[0];
@@ -5236,4 +5236,4 @@ _f4u$t.main_loop = function() {
   }
 }
 
-$(document).ready(function() { _f4u$t.main_loop(); });
+// $(document).ready(function() { _f4u$t.main_loop(); });
