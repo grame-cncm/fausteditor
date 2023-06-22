@@ -167,7 +167,7 @@ export async function compileDSP() {
     }
 }
 
-function expandDSP(dsp_code) {
+export function expandDSP(dsp_code) {
     // Prepare argv list
     var argv = [];
     argv.push("-ftz");

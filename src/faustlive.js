@@ -23,7 +23,7 @@ import "tippy.js/dist/tippy.css";
 import { deleteQrCode, updateQrCode, cancelLoader } from "./exportUI";
 import { getSHAKey, sendPrecompileRequest } from "./ExportLib";
 import { activateMIDIInput, loadPageState, restoreMenus, saveDSPState, savePageState, setLocalStorage } from "./runfaust";
-import { audio_context, compileDSP, deleteDSP, DSP, workletAvailable } from "./compilefaust";
+import { audio_context, compileDSP, deleteDSP, DSP, expandDSP, workletAvailable } from "./compilefaust";
 import { getStorageItemValue } from "./localStorage"
 import { _f4u$t } from "./jsscripts"
 
