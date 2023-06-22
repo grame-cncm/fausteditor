@@ -5,8 +5,6 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
             
-        <!-- Origin Trial Token, feature = AudioWorklet, origin = https://faust.grame.fr, expires = 2018-01-27 -->
-        <meta http-equiv="origin-trial" data-feature="AudioWorklet" data-expires="2018-03-03" content="ApDZ87+zpjI09+oIyEDTPDZtGN4bs1lh9n83f+4ssENINML3DxJbklOsd8Hu+M82TY4eIP/B2l7Iued7Y5I4hQAAAABUeyJvcmlnaW4iOiJodHRwczovL2ZhdXN0LmdyYW1lLmZyOjQ0MyIsImZlYXR1cmUiOiJBdWRpb1dvcmtsZXQiLCJleHBpcnkiOjE1MjAxMjA2MDB9">
         <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700|Roboto:300,400" rel="stylesheet">
 
         <style type="text/css">
@@ -439,7 +437,8 @@
                 return context.audioWorklet && typeof context.audioWorklet.addModule === 'function';
             }
 
-            var audio_context = (isWebKitAudio) ? new webkitAudioContext() : new AudioContext();
+            var audio_context = (isWebKitAudio) ? new webkitAudioContext({ latencyHint: 0.00001 }) : new AudioContext({ latencyHint: 0.00001 });
+            audio_context.destination.channelInterpretation = "discrete";
             var buffer_size = 1024;
             var audio_input = null;
             var factory = null;
@@ -452,6 +451,7 @@
             var rendering_mode = "ScriptProcessor";
             var output_handler = null;
             
+            /*
             // compute libraries URL relative to current page
             var wurl =  window.location.href;
             var qm = wurl.indexOf('?');
@@ -459,8 +459,12 @@
                 wurl = wurl.substr(0, qm);  // remove options from the URL
             }
             var libraries_url = wurl.substr(0, wurl.lastIndexOf('/')) + "/libraries/";
-            //console.log("libraries_url :", libraries_url);
-         
+            console.log("libraries_url :", libraries_url);
+            */
+
+            var libraries_url = "http://127.0.0.1:8000/../../libraries/";
+            //var libraries_url = "https://faust.grame.fr/libraries/";
+
             function setBufferSize(bs_item)
             {
                 buffer_size = parseInt(bs_item.options[bs_item.selectedIndex].value);
@@ -550,7 +554,7 @@
                 } else if (cmd === 11) {
                     ctrlChange(channel, data1, data2);
                 } else if (cmd === 14) {
-                    pitchWheel(channel, ((data2 * 128.0 + data1)-8192)/8192.0);
+                    pitchWheel(channel, (data2 * 128.0 + data1));
                 }
                 
                 /*
@@ -600,16 +604,15 @@
             function activateAudioInput()
             {
                 console.log("activateAudioInput");
-                if (!navigator.getUserMedia) {
-                    navigator.getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-                }
 
-                if (navigator.getUserMedia) {
-                    navigator.getUserMedia({audio: { echoCancellation: false }}, getDevice, function(e) {
-                                           alert('Error getting audio input');
-                                           console.log(e);
-                                           audio_input = null;
-                                           });
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false } })
+                        .then(getDevice)
+                        .catch((e) => {
+                            alert('Error getting audio input');
+                            console.log(e);
+                            audio_input = null;
+                        });
                 } else {
                     alert('Audio input API not available');
                 }
@@ -821,9 +824,9 @@
             
             function checkPolyphonicDSP(json)
             {
-                if (!((json.indexOf("/freq") !== -1)
-                    && (json.indexOf("/gain") !== -1)
-                    && (json.indexOf("/gate") !== -1))) {
+                if (!(((json.indexOf("/freq") !== -1) || (json.indexOf("/key") !== -1))
+                    && (json.indexOf("/gate") !== -1)
+                    && ((json.indexOf("/gain") !== -1) || (json.indexOf("/vel") !== -1) || (json.indexOf("/velocity") !== -1)))) {
                     alert("Faust DSP code is not Polyphonic, it will probably not work correctly in this mode...")
                 }
             }
@@ -831,6 +834,7 @@
             function deleteDSP()
             {
                 if (DSP) {
+                    DSP.destroy();
                     if (audio_input) {
                         audio_input.disconnect(DSP);
                     }
@@ -1015,7 +1019,7 @@
             // Timer to save page and DSP state to local storage
             setInterval(function() { savePageState(); if (DSP) { saveDSPState(); }}, 1000);
             
-            // 'faust_module' global is defined in webaudio-wasm-wrapper.js file, 'onRuntimeInitialized' will be called when code is ready
+            // 'faust_module' global is defined in webaudio-wasm-wrapper.js file, 'onRuntimeInitialized' will be called when the code is ready
             // (see https://kripken.github.io/emscripten-site/docs/getting_started/FAQ.html)
             
             faust_module['onRuntimeInitialized'] = init;
@@ -1042,7 +1046,7 @@
             <div id="export" style="color:white; position: absolute; width:400px; padding:2px 2px 2px 2px; background-color:hsla(59, 99%, 50%, 0.92); visibility:hidden; ">
 
                 <div id="centerDiv" style="position:relative; margin-right:auto; margin-left:auto; text-align:center;">
-                    <input id="exportUrl" style="color:black; border:0px; text-align:center; font-size:11px; background-color:#00000000; outline: 0px solid transparent; position:relative; margin-left:auto; margin-right:auto; text-align:center;" contenteditable="true" value="https://faustservicecloud.grame.fr" onkeyup="onEnterKey()"/>
+                    <input id="exportUrl" style="color:black; border:0px; text-align:center; font-size:11px; background-color:#00000000; outline: 0px solid transparent; position:relative; margin-left:auto; margin-right:auto; text-align:center;" contenteditable="true" value="https://faustservice.grame.fr" onkeyup="onEnterKey()"/>
                     </br>
                     </br>
                     </br>
@@ -1124,8 +1128,8 @@
                 </svg>
             </div>
 
-            <script src="scripts/ExportLib.js"></script>
-            <script src="scripts/qrcode.js"></script>
+            <script src="ExportLib.js"></script>
+            <script src="qrcode.js"></script>
 
             <script>
 
