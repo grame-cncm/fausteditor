@@ -13,7 +13,9 @@
 	<link rel=stylesheet href="node_modules/codemirror/lib/codemirror.css">
 	<link rel=stylesheet href="node_modules/codemirror/addon/hint/show-hint.css">
 	<link rel=stylesheet href="editor.css">
-	<link rel=stylesheet href="font-awesome/css/font-awesome.min.css">
+	<script type="module">
+		import "@fortawesome/fontawesome-free/js/all"
+	</script>
 	<link rel=stylesheet href="tippy.css">
 	<link rel=stylesheet href="faust.css">
 
@@ -24,7 +26,7 @@
 		<div class="logozone"><img src="faust-logo.png" width=58px alt="LOGO"></div>
 		<div class="actionzone">
 			<div role=button class="dynamic-button" id="run" title="(CTRL-R) Compile and run the Faust program">
-				<i class=" fa fa-play" aria-hidden="true"></i>
+				<i class="fa fa-play" aria-hidden="true"></i>
 			</div>
 
 			<div role=button class="action-button" id="upload" title="Upload/Edit a local file" onclick="loadFaustCode()">
@@ -44,7 +46,7 @@
 			</div>
 
 			<div role=button class="dynamic-button" id="block" title="View the block diagram">
-				<i class="fa fa-picture-o" aria-hidden="true"></i>
+				<i class="fa fa-image" aria-hidden="true"></i>
 			</div>
 
 			<div role=button class="action-button" id="config" title="Configure running mode" onclick="openConfigDialog()">
