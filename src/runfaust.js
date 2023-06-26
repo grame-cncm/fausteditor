@@ -1,4 +1,4 @@
-import { audio_context, DSP, output_handler } from "./compilefaust";
+import { audio_context, DSP, isPoly, output_handler } from "./compilefaust";
 import { getStorageItemValue, setStorageItemValue } from "./localStorage"
 
 export var buffer_size = 1024;

@@ -4,7 +4,7 @@ import { _f4u$t } from "./jsscripts"
 
 var isWebKitAudio = (typeof (webkitAudioContext) !== "undefined");
 var isWasm = (typeof (WebAssembly) !== "undefined");
-var isPoly = false;
+export var isPoly = false;
 
 if (!isWasm) {
     alert("WebAssembly is not supported in this browser, the page will not work !")
