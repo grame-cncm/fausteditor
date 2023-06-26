@@ -1,4 +1,8 @@
-//@ts-check
+// @ts-check
+import jsURL from "@shren/faustwasm/libfaust-wasm/libfaust-wasm.js?url"
+import dataURL from "@shren/faustwasm/libfaust-wasm/libfaust-wasm.data?url"
+import wasmURL from "@shren/faustwasm/libfaust-wasm/libfaust-wasm.wasm?url"
+
 /** @type {typeof AudioContext} */
 const AudioContextConstructor = globalThis.AudioContext || globalThis.webkitAudioContext;
 const audio_context = new AudioContextConstructor({ latencyHint: 0.00001 });
@@ -42,7 +46,7 @@ let output_handler = (path, value) => faustUI.paramChangeByDSP(path, value);
 /**
  * @param {HTMLSelectElement} bs_item 
  */
-const setBufferSize = (bs_item) => {
+export const setBufferSize = (bs_item) => {
     buffer_size = parseInt(bs_item.options[bs_item.selectedIndex].value);
     if (buffer_size === 128 && rendering_mode === "ScriptProcessor") {
         console.log("buffer_size cannot be set to 128 in ScriptProcessor mode !");
@@ -55,7 +59,7 @@ const setBufferSize = (bs_item) => {
 /**
  * @param {HTMLSelectElement} poly_item 
  */
-const setPoly = (poly_item) => {
+export const setPoly = (poly_item) => {
     poly_flag = poly_item.options[poly_item.selectedIndex].value;
     compileDSP();
 }
@@ -63,7 +67,7 @@ const setPoly = (poly_item) => {
 /**
  * @param {HTMLSelectElement} voices_item 
  */
-const setPolyVoices = (voices_item) => {
+export const setPolyVoices = (voices_item) => {
     poly_nvoices = parseInt(voices_item.options[voices_item.selectedIndex].value);
     compileDSP();
 }
@@ -71,7 +75,7 @@ const setPolyVoices = (voices_item) => {
 /**
  * @param {HTMLSelectElement} rendering_item 
  */
-const setRenderingMode = (rendering_item) => {
+export const setRenderingMode = (rendering_item) => {
     rendering_mode = rendering_item.options[rendering_item.selectedIndex].value;
     /** @type {HTMLSelectElement} */
     const selectedBuffer = document.getElementById("selectedBuffer");
@@ -90,7 +94,7 @@ const setRenderingMode = (rendering_item) => {
 /**
  * @param {HTMLSelectElement} ftz_item 
  */
-const setFTZ = (ftz_item) => {
+export const setFTZ = (ftz_item) => {
     ftz_flag = ftz_item.options[ftz_item.selectedIndex].value;
     compileDSP();
 }
@@ -98,7 +102,7 @@ const setFTZ = (ftz_item) => {
 /**
  * @param {HTMLSelectElement} sample_item 
  */
-const setSampleFormat = (sample_item) => {
+export const setSampleFormat = (sample_item) => {
     sample_format = sample_item.options[sample_item.selectedIndex].value;
     compileDSP();
 }
@@ -238,7 +242,7 @@ const getDevice = (device) => {
     audio_input.connect(DSP);
 }
 
-const setLocalStorage = (state) => {
+export const setLocalStorage = (state) => {
     console.log(state);
     setStorageItemValue('FaustLibTester', 'FaustLocalStorage', ((state) ? "on" : "off"));
 }
@@ -584,7 +588,7 @@ const init = async () => {
     } = await import("@shren/faustwasm");
     FaustUI = (await import("@shren/faust-ui")).FaustUI;
     // Init Faust compiler and node factory 
-    const module = await instantiateFaustModuleFromFile("../node_modules/@shren/faustwasm/libfaust-wasm/libfaust-wasm.js");
+    const module = await instantiateFaustModuleFromFile(jsURL, dataURL, wasmURL);
     // const module = await instantiateFaustModule();
     const libFaust = new LibFaust(module);
     faust_compiler = new FaustCompiler(libFaust);

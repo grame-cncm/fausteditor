@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FaustLive WASM</title>
     <link rel="stylesheet" href="css/faustlive-wasm.css">
-    <link rel="stylesheet" href="scripts/faust-ui/index.css">
 </head>
 <body>
     <center>
@@ -125,6 +124,9 @@
 
     <div id="faust-ui"></div>
 
-    <script src="src/faustlive-wasm.js"></script>
+    <script type="module">
+        import { setBufferSize, setPoly, setPolyVoices, setRenderingMode, setFTZ, setSampleFormat, setLocalStorage } from "./src/faustlive-wasm";
+        Object.assign(window, { setBufferSize, setPoly, setPolyVoices, setRenderingMode, setFTZ, setSampleFormat, setLocalStorage })
+    </script>
 </body>
 </html>
