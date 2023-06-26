@@ -164,11 +164,11 @@ process = +;</textarea>
 
 	<script type="module">
 		import { changeArchs, deleteQrCode, onEnterKey } from "./src/exportUI";
-		import { openConfigDialog, closeConfigDialog, closeExportDialog, exportFaustSource, stopFaustCode } from "./src/faustlive";
+		import { openConfigDialog, closeConfigDialog, closeExportDialog, exportFaustSource, faustDocumentation, loadFaustCode, saveFaustCode, stopFaustCode } from "./src/faustlive";
 		import { setBufferSize, setPoly, setPolyVoices, setRenderingMode } from "./src/runfaust";
 		Object.assign(window, {
 		  changeArchs, deleteQrCode, onEnterKey,
-		  openConfigDialog, closeConfigDialog, closeExportDialog, exportFaustSource, stopFaustCode,
+		  openConfigDialog, closeConfigDialog, closeExportDialog, exportFaustSource, faustDocumentation, loadFaustCode, saveFaustCode, stopFaustCode,
 		  setBufferSize, setPoly, setPolyVoices, setRenderingMode,
 		})
 	</script>

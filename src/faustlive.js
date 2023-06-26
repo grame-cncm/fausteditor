@@ -215,7 +215,7 @@ function download(filename, text) {
 //-----------------------------------------------------------------------
 
 // Save section
-function saveFaustCode() {
+export function saveFaustCode() {
     console.log('save faust code');
     download(document.getElementById('filename').value, codeEditor.getValue());
 }
@@ -237,7 +237,7 @@ function readSourceFile(evt) {
 }
 
 // Load Faust file from local file system via #fileinput element
-function loadFaustCode() {
+export function loadFaustCode() {
     console.log('load faust code');
     var gFileInput = document.getElementById('fileinput');
     gFileInput.addEventListener('change', readSourceFile, false);
@@ -404,7 +404,7 @@ function buildDocURL(word, pos) {
 
 // Open the documentation for the function under the cursor,
 // handle special case at the end of a word.
-function faustDocumentation() {
+export function faustDocumentation() {
     // console.log("open Faust documentation");
     let word = codeEditor.getSelection();
     // Default URL is the librairies 
