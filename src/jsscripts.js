@@ -688,7 +688,7 @@ _f4u$t.quantize = function(ov,m,n,s) {
   var v = _f4u$t.bound(ov, m, n);
   var mn = Math.min(m,n);
   var mx = Math.max(m,n);
-  out = Math.floor((v - mn) / s + 0.5) * s + mn;
+  var out = Math.floor((v - mn) / s + 0.5) * s + mn;
   return _f4u$t.bound(out, m, n);
 }
 
@@ -2483,7 +2483,7 @@ _f4u$t.SlidingObject.prototype.dims = function() {
 
 _f4u$t.SlidingObject.prototype.stretch = function(x,y) {
   if (this.stretchable[this.axis]) {
-    dims = this.dims();
+    var dims = this.dims();
     this.length = Math.max(dims[this.axis], _f4u$t.xy(this.axis, x, y));
   }
 }
@@ -3660,7 +3660,7 @@ _f4u$t.getnumspecs = function(dct) {
   minsplit[1] = minsplit[1] || '';
   stepsplit[1] = stepsplit[1] || '';
   initsplit[1] = initsplit[1] || '';
-  parser = integer ? parseInt : parseFloat;
+  var parser = integer ? parseInt : parseFloat;
   return {
     min : parser(dct["min"]),
     max : parser(dct["max"]),
@@ -5237,3 +5237,4 @@ _f4u$t.main_loop = function() {
 }
 
 // $(document).ready(function() { _f4u$t.main_loop(); });
+window._f4u$t = _f4u$t
