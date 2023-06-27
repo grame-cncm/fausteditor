@@ -357,7 +357,6 @@ export function stopFaustCode() {
     deleteDSP();
 
     document.getElementById('faustuiwrapper').style.display = 'none';
-    document.getElementById('faustui').classList.remove('hasSVG');
 }
 
 //-----------------------------------------------------------------------

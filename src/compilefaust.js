@@ -1,14 +1,16 @@
 import { dsp_code } from "./faustlive";
 import { activateAudioInput, audio_input, buffer_size, checkPolyphonicDSP, ftz_flag, loadDSPState, poly_flag, poly_nvoices, rendering_mode, resetAudioInput } from "./runfaust";
-import { _f4u$t } from "./jsscripts"
+import { _f4u$t } from "./jsscripts";
+import { FaustUI } from "@shren/faust-ui";
 
 var isWebKitAudio = (typeof (webkitAudioContext) !== "undefined");
 var isWasm = (typeof (WebAssembly) !== "undefined");
-export var isPoly = false;
 
 if (!isWasm) {
     alert("WebAssembly is not supported in this browser, the page will not work !")
 }
+
+export var isPoly = false;
 
 export var audio_context = (isWebKitAudio) ? new webkitAudioContext({ latencyHint: 0.00001 }) : new AudioContext({ latencyHint: 0.00001 });
 audio_context.destination.channelInterpretation = "discrete";
@@ -16,7 +18,11 @@ audio_context.destination.channelInterpretation = "discrete";
 audio_context.destination.channelCount = audio_context.destination.maxChannelCount;
 
 export var DSP = null;
-export var output_handler = null;
+
+const faustUIRoot = document.getElementById("faust-ui");
+let faustUI;
+export const output_handler = (path, value) => faustUI.paramChangeByDSP(path, value);
+
 var midi_input = [];
 var factory_stack = [];
 var faust_svg = null;
@@ -54,10 +60,9 @@ export function deleteDSP() {
         }
         DSP.disconnect(audio_context.destination);
         DSP.destroy();
-        _f4u$t.hard_delete(faust_svg);
-
+        faustUIRoot.innerHTML = "";
         DSP = null;
-        faust_svg = null;
+        faustUI = null;
     }
 }
 
@@ -71,8 +76,8 @@ function activateDSP(dsp) {
         }
 
         // Setup UI
-        faust_svg = $('#faustui');
-        output_handler = _f4u$t.main(DSP.getJSON(), $(faust_svg), function (path, val) { DSP.setParamValue(path, +val); });
+        faustUI = new FaustUI({ ui: DSP.getUI(), root: faustUIRoot });
+        faustUI.paramChangeByUI = (path, value) => DSP.setParamValue(path, value);
         DSP.setOutputParamHandler(output_handler);
         DSP.connect(audio_context.destination);
 

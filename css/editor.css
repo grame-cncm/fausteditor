@@ -136,8 +136,8 @@ html {
 
 .faustui {
 	margin:20px 40px 40px 40px;
-	/* width: calc(100% - 80px); */
-	/* height: calc(100% - 80px); */
+	width: calc(100% - 80px);
+	height: calc(100% - 80px);
 }
 
 /* Close Button used to stop the running Faust code */
