@@ -579,7 +579,7 @@ const tippyOptions = {
     },
 }
 
-for (const className of ["action-button", "action-select", "dropzone"]) {
+for (const className of ["action-button", "action-select", "dropzone", "dynamic-button"]) {
     tippy(`.${className}`, tippyOptions)
 }
 
