@@ -1,6 +1,5 @@
 import { dsp_code } from "./faustlive";
 import { activateAudioInput, audio_input, buffer_size, checkPolyphonicDSP, ftz_flag, loadDSPState, poly_flag, poly_nvoices, rendering_mode, resetAudioInput } from "./runfaust";
-import { _f4u$t } from "./jsscripts";
 import { FaustUI } from "@shren/faust-ui";
 
 var isWebKitAudio = (typeof (webkitAudioContext) !== "undefined");
