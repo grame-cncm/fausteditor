@@ -1,5 +1,6 @@
 import { audio_context, DSP, isPoly, output_handler } from "./compilefaust";
-import { getStorageItemValue, setStorageItemValue } from "./localStorage"
+import { codeEditor } from "./faustlive";
+import { getStorageItemValue, setStorageItemValue } from "./localStorage";
 
 export var buffer_size = 1024;
 export var audio_input = null;
@@ -161,12 +162,12 @@ export function setLocalStorage(state) {
     setStorageItemValue('FaustEditor', 'FaustLocalStorage', ((state) ? "on" : "off"));
 }
 
-function setDSPStorage(state) {
+export function setDSPStorage(state) {
     console.log(state);
     setStorageItemValue('FaustEditor', 'FaustDSPStorage', ((state) ? "on" : "off"));
 }
 
-function setSourceStorage(state) {
+export function setSourceStorage(state) {
     console.log(state);
     setStorageItemValue('FaustEditor', 'FaustSourceStorage', ((state) ? "on" : "off"));
 }

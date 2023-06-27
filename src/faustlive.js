@@ -66,7 +66,7 @@ const docSections = {
     "wd": "wdmodels"
 };
 
-var codeEditor = CodeMirror.fromTextArea(myTextarea, {
+export var codeEditor = CodeMirror.fromTextArea(myTextarea, {
     lineNumbers: true,
     mode: 'faust',
     smartIndent: true,
