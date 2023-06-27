@@ -3,8 +3,25 @@ The online  [Faust Editor](https://fausteditor.grame.fr) can be used to _edit_, 
 
 ![](/images/editor-help.png)
 
+## Features
 
-## Instructions
+The editor engine is based on [CodeMirror](https://codemirror.net/). It provides _syntax highlighting_, _auto completion_ and direct access to the _online documentation_. The documentation command (ctrl-d) uses the function name at the cursor position to locate to the relevant information.
+
+![](/images/editor-doc.png)
+
+## Recommended Browsers
+
+The recommended browsers are the latest versions of Firefox and Chrome.
+
+## Useful links
+
+- [https://fausteditor.grame.fr](https://fausteditor.grame.fr): the official link on the Faust Editor website. 
+- [https://github.com/grame-cncm/fausteditor](https://github.com/grame-cncm/fausteditor): the github repository
+
+## Development
+
+### Notes
+We use [Vite](https://vitejs.dev/) for development mode and builds. Dependencies include [CodeMirror](https://codemirror.net/5/) for providing an editor, [FaustWasm](https://github.com/Fr0stbyteR/faustwasm) for compiling Faust client-side, and [FaustUI](https://github.com/Fr0stbyteR/faust-ui) for rendering widgets.
 
 ### Setup
 Clone and enter the repository, then run:
@@ -16,24 +33,14 @@ npm install
 ```bash
 npm run dev
 ```
+Then press <kbd>o</kbd> to open in a browser.
 
 ### Build
 ``` shell
 npm run build
 ```
-Generates output in `dist/`
-
-## Features
-
-The editor engine is based on [CodeMirror](https://codemirror.net/). It provides _syntax highlighting_, _auto completion_ and direct access to the _online documentation_. The documentation command (ctrl-d) uses the function name at the cursor position to locate to the relevant information.
-
-![](/images/editor-doc.png) 
-
-## Recommended Browsers
-
-The recommended browsers are the latest versions of Firefox and Chrome.
-
-## Useful links
-
-- [https://fausteditor.grame.fr](https://fausteditor.grame.fr): the official link on the Faust Editor website. 
-- [https://github.com/grame-cncm/fausteditor](https://github.com/grame-cncm/fausteditor): the github repository
+Generates output in `dist/`. To view locally, run
+``` shell
+cd dist
+python -m http.server
+```
