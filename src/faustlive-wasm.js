@@ -1,7 +1,7 @@
 // @ts-check
-import jsURL from "@shren/faustwasm/libfaust-wasm/libfaust-wasm.js?url"
-import dataURL from "@shren/faustwasm/libfaust-wasm/libfaust-wasm.data?url"
-import wasmURL from "@shren/faustwasm/libfaust-wasm/libfaust-wasm.wasm?url"
+import jsURL from "@grame/faustwasm/libfaust-wasm/libfaust-wasm.js?url"
+import dataURL from "@grame/faustwasm/libfaust-wasm/libfaust-wasm.data?url"
+import wasmURL from "@grame/faustwasm/libfaust-wasm/libfaust-wasm.wasm?url"
 
 /** @type {typeof AudioContext} */
 const AudioContextConstructor = globalThis.AudioContext || globalThis.webkitAudioContext;
@@ -585,7 +585,7 @@ const init = async () => {
         FaustMonoDspGenerator,
         FaustPolyDspGenerator,
         LibFaust
-    } = await import("@shren/faustwasm");
+    } = await import("@grame/faustwasm");
     FaustUI = (await import("@shren/faust-ui")).FaustUI;
     // Init Faust compiler and node factory 
     const module = await instantiateFaustModuleFromFile(jsURL, dataURL, wasmURL);

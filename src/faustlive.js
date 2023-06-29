@@ -15,9 +15,9 @@ import "./codemirror/addon/hint/faust-hint";
 
 import "codemirror/";
 
-import jsURL from "@shren/faustwasm/libfaust-wasm/libfaust-wasm.js?url"
-import dataURL from "@shren/faustwasm/libfaust-wasm/libfaust-wasm.data?url"
-import wasmURL from "@shren/faustwasm/libfaust-wasm/libfaust-wasm.wasm?url"
+import jsURL from "@grame/faustwasm/libfaust-wasm/libfaust-wasm.js?url"
+import dataURL from "@grame/faustwasm/libfaust-wasm/libfaust-wasm.data?url"
+import wasmURL from "@grame/faustwasm/libfaust-wasm/libfaust-wasm.wasm?url"
 
 import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
@@ -658,7 +658,7 @@ function init() {
         FaustMonoDspGenerator,
         FaustPolyDspGenerator,
         LibFaust
-    } = await import("@shren/faustwasm");
+    } = await import("@grame/faustwasm");
     // Init Faust compiler and node factory 
     const module = await instantiateFaustModuleFromFile(jsURL, dataURL, wasmURL);
     const libFaust = new LibFaust(module);
