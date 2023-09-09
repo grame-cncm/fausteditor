@@ -27,7 +27,6 @@ let get_faust_poly_factory = null;
 let isPoly = false;
 let buffer_size = 1024;
 let audio_input = null;
-let factory = null;
 /** @type {import("./faustwasm").FaustAudioWorkletNode<any> | import("./faustwasm").FaustScriptProcessorNode<any>} */
 let DSP = null;
 /** @type {string} */
@@ -394,21 +393,21 @@ const uploadOn = (e) => {
             alert("WebAssembly is not supported in this browser !");
             reject("WebAssembly is not supported in this browser !");
         }
-    
+
         // CASE 1 : THE DROPPED OBJECT IS A URL TO SOME FAUST CODE
         if (e.dataTransfer.getData('URL') && e.dataTransfer.getData('URL').split(':').shift() != "file") {
             const url = e.dataTransfer.getData('URL');
             let filename = url.toString().split('/').pop();
             filename = filename.toString().split('.').shift();
             const xmlhttp = new XMLHttpRequest();
-    
+
             xmlhttp.onreadystatechange = () => {
                 if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
                     dsp_code = xmlhttp.responseText;
                     callback(dsp_code);
                 }
             }
-    
+
             try {
                 xmlhttp.open("GET", url, false);
                 // Avoid error "mal formé" on firefox
@@ -418,10 +417,10 @@ const uploadOn = (e) => {
                 alert(err);
                 reject(err);
             }
-    
+
         } else if (e.dataTransfer.getData('URL').split(':').shift() != "file") {
             dsp_code = e.dataTransfer.getData('text');
-    
+
             // CASE 2 : THE DROPPED OBJECT IS SOME FAUST CODE
             if (dsp_code) {
                 callback(dsp_code);
@@ -431,17 +430,17 @@ const uploadOn = (e) => {
                 /** @type {FileList} */
                 const files = e.target.files || e.dataTransfer.files;
                 const file = files[0];
-    
+
                 if (location.host.indexOf("sitepointstatic") >= 0) return;
-    
+
                 const request = new XMLHttpRequest();
                 if (request.upload) {
-    
+
                     const reader = new FileReader();
                     const ext = file.name.toString().split('.').pop();
                     const filename = file.name.toString().split('.').shift();
                     let type;
-    
+
                     if (ext === "dsp") {
                         type = "dsp";
                         reader.readAsText(file);
@@ -449,7 +448,7 @@ const uploadOn = (e) => {
                         type = "json";
                         reader.readAsText(file);
                     }
-    
+
                     reader.onloadend = (e) => {
                         dsp_code = reader.result;
                         callback(dsp_code);
@@ -598,8 +597,6 @@ const init = async () => {
     // const module = await instantiateFaustModule();
     const libFaust = new LibFaust(module);
     faust_compiler = new FaustCompiler(libFaust);
-    // faust_mono_factory = new FaustMonoDspGenerator();
-    // faust_poly_factory = new FaustPolyDspGenerator();
     get_faust_mono_factory = () => new FaustMonoDspGenerator();
     get_faust_poly_factory = () => new FaustPolyDspGenerator();
 
