@@ -149,6 +149,7 @@ export async function compileDSP() {
         console.log("Poly DSP");
         // Create a poly DSP factory from the dsp code
         try {
+            window.faust_poly_factory = get_faust_poly_factory();
             const { voiceFactory, effectFactory } = await faust_poly_factory.compile(faust_compiler, "FaustDSP", dsp_code, argv.join(" "));
             compilePolyDSP(voiceFactory, effectFactory)
         } catch (error) {
@@ -161,6 +162,7 @@ export async function compileDSP() {
         console.log("Mono DSP");
         // Create a mono DSP factory from the dsp code
         try {
+            window.faust_mono_factory = get_faust_mono_factory();
             const { factory } = await faust_mono_factory.compile(faust_compiler, "FaustDSP", dsp_code, argv.join(" "));
             compileMonoDSP(factory);
         } catch (error) {

@@ -663,7 +663,9 @@ function init() {
     const module = await instantiateFaustModuleFromFile(jsURL, dataURL, wasmURL);
     const libFaust = new LibFaust(module);
     window.faust_compiler = new FaustCompiler(libFaust);
-    window.faust_mono_factory = new FaustMonoDspGenerator();
-    window.faust_poly_factory = new FaustPolyDspGenerator();
+    // window.faust_mono_factory = new FaustMonoDspGenerator();
+    // window.faust_poly_factory = new FaustPolyDspGenerator();
+    window.get_faust_mono_factory = () => new FaustMonoDspGenerator();
+    window.get_faust_poly_factory = () => new FaustPolyDspGenerator();
     init();
 })();

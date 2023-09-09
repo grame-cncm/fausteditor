@@ -14,12 +14,16 @@ const workletAvailable = typeof AudioWorklet !== "undefined";
 /** @type {HTMLDivElement} */
 const faustUIRoot = document.getElementById("faust-ui");
 
-/** @type {import("./faustwasm").FaustCompiler} */
+/** @type {import("@grame//faustwasm").FaustCompiler} */
 let faust_compiler = null;
-/** @type {import("./faustwasm").FaustMonoDspGenerator} */
+/** @type {import("@grame//faustwasm").FaustMonoDspGenerator} */
 let faust_mono_factory = null;
-/** @type {import("./faustwasm").FaustPolyDspGenerator} */
+/** @type {import("@grame//faustwasm").FaustPolyDspGenerator} */
 let faust_poly_factory = null;
+/** @type {() => import("@grame//faustwasm").FaustMonoDspGenerator} */
+let get_faust_mono_factory = null;
+/** @type {() => import("@grame//faustwasm").FaustPolyDspGenerator} */
+let get_faust_poly_factory = null;
 let isPoly = false;
 let buffer_size = 1024;
 let audio_input = null;
@@ -549,12 +553,14 @@ const compileDSP = async () => {
     if (poly_flag === "ON") {
         isPoly = true;
         console.log("Poly DSP");
+        faust_poly_factory = get_faust_poly_factory();
         await faust_poly_factory.compile(faust_compiler, "FaustDSP", dsp_code, argv);
         DSP = await faust_poly_factory.createNode(audio_context, poly_nvoices, undefined, undefined, undefined, undefined, (rendering_mode === "ScriptProcessor"), buffer_size);
         activatePolyDSP(DSP);
     } else {
         isPoly = false;
         console.log("Mono DSP");
+        faust_mono_factory = get_faust_mono_factory();
         await faust_mono_factory.compile(faust_compiler, "FaustDSP", dsp_code, argv);
         DSP = await faust_mono_factory.createNode(audio_context, undefined, undefined, (rendering_mode === "ScriptProcessor"), buffer_size);
         activateMonoDSP(DSP);
@@ -592,8 +598,10 @@ const init = async () => {
     // const module = await instantiateFaustModule();
     const libFaust = new LibFaust(module);
     faust_compiler = new FaustCompiler(libFaust);
-    faust_mono_factory = new FaustMonoDspGenerator();
-    faust_poly_factory = new FaustPolyDspGenerator();
+    // faust_mono_factory = new FaustMonoDspGenerator();
+    // faust_poly_factory = new FaustPolyDspGenerator();
+    get_faust_mono_factory = () => new FaustMonoDspGenerator();
+    get_faust_poly_factory = () => new FaustPolyDspGenerator();
 
     // Check AudioWorklet support
     if (!workletAvailable) {

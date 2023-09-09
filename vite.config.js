@@ -10,5 +10,6 @@ export default defineConfig({
         other: resolve(__dirname, 'faustlive-wasm.html'),
       },
     },
+    sourcemap: true
   },
 })
