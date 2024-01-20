@@ -1,7 +1,7 @@
 {
   "name": "fausteditor",
   "private": true,
-  "version": "1.0.33",
+  "version": "1.0.34",
   "description": "A simple Faust editor for the web",
   "scripts": {
     "dev": "vite",
@@ -9,11 +9,11 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "vite": "^4.3.9"
+    "vite": ">=4.5.2q"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.4.0",
-    "@grame/faustwasm": "^0.0.52",
+    "@grame/faustwasm": "^0.0.53",
     "@shren/faust-ui": "^1.1.5",
     "codemirror": "^5.58.2",
     "qrcode": "^1.5.3",
