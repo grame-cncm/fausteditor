@@ -604,7 +604,7 @@ window.addEventListener('touchstart', function () {
 
 // Main entry point, called when libfaust.js has finished to load
 function init() {
-    console.log('FaustEditor: version 1.0.39');
+    console.log('FaustEditor: version 1.0.40');
 
     // Try to load code from current URL
     configureEditorFromUrlParams();
