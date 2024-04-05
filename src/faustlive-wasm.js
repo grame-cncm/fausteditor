@@ -222,7 +222,7 @@ const activateMIDIInput = () => {
 const activateAudioInput = () => {
     console.log("activateAudioInput");
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false } })
+        navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, autoGainControl: false, noiseSuppression: false } })
             .then(getDevice)
             .catch((e) => {
                 alert('Error getting audio input');
