@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,6 +8,7 @@
     <title>FaustLive WASM</title>
     <link rel="stylesheet" href="css/faustlive-wasm.css">
 </head>
+
 <body>
     <center>
         <H1> Testing the embedded dynamic Faust compiler </H1>
@@ -82,7 +84,6 @@
             <p>AudioWorklet: audio rendering is done using the new AudioWorklet model.
             <p>
         </div>
-
         <div class="config-element">
             <H3>Sample format</H3>
             <form method="POST" name="menu">
@@ -105,7 +106,6 @@
             <p>
             <p>2: uses a <B>bitmask</B> to detect denormal values (faster).</p>
         </div>
-
     </div>
 
     <p> <input id="localstorage" type="checkbox" onclick="setLocalStorage(checked)"> <B>Save page and DSP control
@@ -126,4 +126,5 @@
         Object.assign(window, { setBufferSize, setPoly, setPolyVoices, setRenderingMode, setFTZ, setSampleFormat, setLocalStorage })
     </script>
 </body>
+
 </html>

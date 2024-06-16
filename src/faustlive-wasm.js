@@ -502,8 +502,9 @@ const activateMonoDSP = (dsp) => {
     faustUI = new FaustUI({ ui: DSP.getUI(), root: faustUIRoot });
     faustUI.paramChangeByUI = (path, value) => DSP.setParamValue(path, value);
     DSP.setOutputParamHandler(output_handler);
-    console.log(DSP.getNumInputs());
-    console.log(DSP.getNumOutputs());
+    DSP.listenSensors();
+    console.log("Inputs = " + DSP.getNumInputs());
+    console.log("Outputs = " + DSP.getNumOutputs());
     //DSP.metadata({ declare: function(key, value) { console.log("key = " + key + " value = " + value); }});
     DSP.connect(audio_context.destination);
     // DSP has to be explicitly started
@@ -529,8 +530,9 @@ const activatePolyDSP = (dsp) => {
     faustUI = new FaustUI({ ui: DSP.getUI(), root: faustUIRoot });
     faustUI.paramChangeByUI = (path, value) => DSP.setParamValue(path, value);
     DSP.setOutputParamHandler(output_handler);
-    console.log(DSP.getNumInputs());
-    console.log(DSP.getNumOutputs());
+    DSP.listenSensors();
+    console.log("Inputs = " + DSP.getNumInputs());
+    console.log("Outputs = " + DSP.getNumOutputs());
     //DSP.metadata({ declare: function(key, value) { console.log("key = " + key + " value = " + value); }});
     DSP.connect(audio_context.destination);
     // DSP has to be explicitly started
