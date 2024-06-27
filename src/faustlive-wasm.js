@@ -499,10 +499,10 @@ const activateMonoDSP = (dsp) => {
     }
 
     // Setup UI
+    DSP.listenSensors();
     faustUI = new FaustUI({ ui: DSP.getUI(), root: faustUIRoot });
     faustUI.paramChangeByUI = (path, value) => DSP.setParamValue(path, value);
     DSP.setOutputParamHandler(output_handler);
-    DSP.listenSensors();
     console.log("Inputs = " + DSP.getNumInputs());
     console.log("Outputs = " + DSP.getNumOutputs());
     //DSP.metadata({ declare: function(key, value) { console.log("key = " + key + " value = " + value); }});
@@ -527,10 +527,10 @@ const activatePolyDSP = (dsp) => {
     }
 
     // Setup UI
+    DSP.listenSensors();
     faustUI = new FaustUI({ ui: DSP.getUI(), root: faustUIRoot });
     faustUI.paramChangeByUI = (path, value) => DSP.setParamValue(path, value);
     DSP.setOutputParamHandler(output_handler);
-    DSP.listenSensors();
     console.log("Inputs = " + DSP.getNumInputs());
     console.log("Outputs = " + DSP.getNumOutputs());
     //DSP.metadata({ declare: function(key, value) { console.log("key = " + key + " value = " + value); }});
