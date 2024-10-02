@@ -78,7 +78,7 @@ function activateDSP(dsp) {
         faustUI = new FaustUI({ ui: DSP.getUI(), root: faustUIRoot });
         faustUI.paramChangeByUI = (path, value) => DSP.setParamValue(path, value);
         DSP.setOutputParamHandler(output_handler);
-        DSP.listenSensors();
+        DSP.startSensors();
         DSP.connect(audio_context.destination);
 
         console.log(DSP.getNumInputs());
