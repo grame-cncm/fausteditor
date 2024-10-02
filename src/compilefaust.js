@@ -58,6 +58,7 @@ export function deleteDSP() {
             audio_input.disconnect(DSP);
         }
         DSP.disconnect(audio_context.destination);
+        DSP.stopSensors();
         DSP.destroy();
         faustUIRoot.innerHTML = "";
         DSP = null;
