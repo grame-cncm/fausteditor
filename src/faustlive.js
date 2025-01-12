@@ -252,6 +252,7 @@ export function loadFaustCode() {
 // nvoices=4|8|16|32|64|128
 // ftz=0|1|2
 // rendering=ScriptProcessor|AudioWorklet
+// format=float|double
 // code=<dsp-code-url>
 // inline=<base64url-encoded-faust>
 //
@@ -271,6 +272,7 @@ function configureEditorFromUrlParams() {
     if (params.has('nvoices')) poly_nvoices = params.get('nvoices');
     if (params.has('ftz')) ftz_flag = params.get('ftz');
     if (params.has('rendering')) rendering_mode = params.get('rendering');
+    if (params.has('sample')) sample_format = params.get('sample');
 
     // And reflect it in the menus
     restoreMenus();
@@ -604,7 +606,7 @@ window.addEventListener('touchstart', function () {
 
 // Main entry point, called when libfaust.js has finished to load
 function init() {
-    console.log('FaustEditor: version 1.2.15');
+    console.log('FaustEditor: version 1.3.0');
 
     // Try to load code from current URL
     configureEditorFromUrlParams();

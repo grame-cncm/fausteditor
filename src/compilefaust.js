@@ -1,5 +1,5 @@
 import { dsp_code } from "./faustlive";
-import { activateAudioInput, audio_input, buffer_size, checkPolyphonicDSP, ftz_flag, loadDSPState, poly_flag, poly_nvoices, rendering_mode, resetAudioInput } from "./runfaust";
+import { activateAudioInput, audio_input, buffer_size, checkPolyphonicDSP, ftz_flag, loadDSPState, poly_flag, poly_nvoices, rendering_mode, sample_format, resetAudioInput } from "./runfaust";
 import { FaustUI } from "@shren/faust-ui";
 
 var isWebKitAudio = (typeof (webkitAudioContext) !== "undefined");
@@ -141,9 +141,11 @@ export async function compileDSP() {
     var argv = [];
     argv.push("-ftz");
     argv.push(ftz_flag);
-    // argv.push("-I");
-    // Libraries are now included and loaded from the EMCC locale FS included in libfaust
-    // argv.push("libraries");
+    if (sample_format === "float") {
+        argv.push("-single ");
+    } else {
+        argv.push("-double");
+    }
     console.log(argv);
 
     if (poly_flag === "ON") {

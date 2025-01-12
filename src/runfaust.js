@@ -7,6 +7,7 @@ export var audio_input = null;
 export function resetAudioInput() { audio_input = null; }
 export var poly_flag = "OFF";
 export var ftz_flag = "2";
+export var sample_format = "float";
 export var poly_nvoices = 16;
 export var rendering_mode = "ScriptProcessor";
 
@@ -31,7 +32,7 @@ export function setPolyVoices(voices_item) {
 }
 
 // TODO(ijc): Unused?
-function setFTZ(ftz_item) {
+export function setFTZ(ftz_item) {
     ftz_flag = ftz_item.options[ftz_item.selectedIndex].value;
 }
 
@@ -47,6 +48,11 @@ export function setRenderingMode(rendering_item) {
         restoreMenu("selectedBuffer", buffer_size);
         document.getElementById("selectedBuffer").disabled = false;
     }
+}
+
+export function setSampleFormat(sample_item) {
+    sample_format = sample_item.options[sample_item.selectedIndex].value;
+    console.log("setSampleFormat", sample_format);
 }
 
 // MIDI input handling
@@ -215,6 +221,7 @@ export function savePageState() {
         setStorageItemValue('FaustEditor', 'ftz_flag', ftz_flag);
         setStorageItemValue('FaustEditor', 'poly_nvoices', poly_nvoices);
         setStorageItemValue('FaustEditor', 'rendering_mode', rendering_mode);
+        setStorageItemValue('FaustEditor', 'sample_format', sample_format);
 
         // Possibly save DSP source
         if (getStorageItemValue('FaustEditor', 'FaustSourceStorage') === "on") {
@@ -230,6 +237,7 @@ export function restoreMenus() {
     restoreMenu("polyVoices", poly_nvoices);
     restoreMenu("selectedFTZ", ftz_flag);
     restoreMenu("selectedRenderingMode", rendering_mode);
+    restoreMenu("selectedSampleFormat", sample_format);
 
     if (rendering_mode === "AudioWorklet") {
         document.getElementById("selectedBuffer").disabled = true;
@@ -246,6 +254,7 @@ export function loadPageState() {
         poly_nvoices = (getStorageItemValue('FaustEditor', 'poly_nvoices') ? getStorageItemValue('FaustEditor', 'poly_nvoices') : 16);
         ftz_flag = (getStorageItemValue('FaustEditor', 'ftz_flag') ? getStorageItemValue('FaustEditor', 'ftz_flag') : 2);
         rendering_mode = (getStorageItemValue('FaustEditor', 'rendering_mode') ? getStorageItemValue('FaustEditor', 'rendering_mode') : "ScriptProcessor");
+        sample_format = (getStorageItemValue('FaustEditor', 'sample_format') ? getStorageItemValue('FaustEditor', 'sample_format') : "float");
 
         // Possibly restore DSP source
         if (getStorageItemValue('FaustEditor', 'FaustSourceStorage') === "on" && getStorageItemValue('FaustEditor', 'dsp_code')) {
