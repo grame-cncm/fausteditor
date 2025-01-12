@@ -29,7 +29,6 @@ import { audio_context, compileDSP, deleteDSP, DSP, expandDSP, workletAvailable 
 import { getStorageItemValue } from "./localStorage"
 
 export var dsp_code = '';
-var base_url = ''; // TODO(ijc): unused?
 
 const docPath = 'https://faustlibraries.grame.fr/libs/';
 const docSections = {
@@ -93,10 +92,6 @@ function uploadOn(e, callback) {
     if (e.dataTransfer.getData('URL') &&
         e.dataTransfer.getData('URL').split(':').shift() != 'file') {
         var url = e.dataTransfer.getData('URL');
-
-        // Get base URL
-        var url_str = url.toString();
-        base_url = url_str.substring(0, url_str.lastIndexOf('/')) + '/';
 
         // Get filename
         var filename = url.toString().split('/').pop();
@@ -181,12 +176,10 @@ function uploadFile(e) {
 function fileDragHover(e) {
     e.stopPropagation();
     e.preventDefault();
-    /*e.target.className = (e.type === "dragover" ? "hover" : "");*/
 }
 
 function updateDSPCode() {
     codeEditor.setValue(dsp_code);
-    // console.log("FAUST CODE:", codeEditor.getValue());
 }
 
 function configureDropZone(zoneid) {

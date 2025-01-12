@@ -41,17 +41,6 @@ export function workletAvailable() {
     return context.audioWorklet && typeof context.audioWorklet.addModule === 'function';
 }
 
-// Do no keep more than 10 alive DSP factories
-/*
-function checkFactoryStack(factory) {
-    if (factory && factory_stack.indexOf(factory) === -1) {
-        factory_stack.push(factory);
-        if (factory_stack.length >= 10) {
-            faust.deleteDSPFactory(factory_stack.shift());
-        }
-    }
-}
-*/
 export function deleteDSP() {
     if (DSP) {
         if (audio_input) {
@@ -182,9 +171,6 @@ export function expandDSP(dsp_code) {
     var argv = [];
     argv.push("-ftz");
     argv.push(ftz_flag);
-    // argv.push("-I");
-    // Libraries are now included and loaded from the EMCC locale FS included in libfaust
-    // argv.push("libraries");
     console.log(argv);
 
     return faust_compiler.expandDSP(dsp_code, argv.join(" "));

@@ -30,8 +30,3 @@ export function setStorageItemValue(item_key, key, value) {
     localStorage.setItem(item_key, JSON.stringify(item_value));
 }
 
-//get value of 'item_key'
-// TODO(ijc): Unused?
-function getStorageItem(item_key) {
-    return (localStorage.getItem(item_key)) ? JSON.parse(localStorage.getItem(item_key)) : null;
-}
