@@ -266,9 +266,10 @@ export function loadPageState() {
 }
 
 export function checkPolyphonicDSP(json) {
-    if (!((json.indexOf("/freq") !== -1)
-        && (json.indexOf("/gain") !== -1)
-        && (json.indexOf("/gate") !== -1))) {
-        alert("Faust DSP code is not Polyphonic, it will probably not work correctly in this mode...");
+    const hasFreqOrKey = json.includes("/freq") || json.includes("/key");
+    const hasGainOrVel = json.includes("/gain") || json.includes("/vel");
+    const hasGate = json.includes("/gate");
+    if (!(hasFreqOrKey && hasGainOrVel && hasGate)) {
+        alert("The Faust DSP code is missing required polyphonic parameters. It may not function correctly in polyphonic mode.");
     }
 }
