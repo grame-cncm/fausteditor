@@ -57,15 +57,22 @@ function forgeURL() {
 export async function updateQrCode(sha, div) {
     deleteQrCode(div);
 
-    var plateform = document.getElementById("Platform").options[document.getElementById("Platform").selectedIndex].value;
-    var architecture = document.getElementById("Architecture").options[document.getElementById("Architecture").selectedIndex].value;
-    var output = (plateform === "android") ? "binary.apk" : "binary.zip";
-
+    var plat = document.getElementById("Platform").options[document.getElementById("Platform").selectedIndex].value;
+    var arch = document.getElementById("Architecture").options[document.getElementById("Architecture").selectedIndex].value;
+    let target;
+    // Check the different possible targets
+    if (arch === "pwa" || arch === "pwa-poly") {
+        target = "index.html";
+    } else if (plat === "chaos-stratus") {
+        target = "installer.sh"
+    } else if (plat === "android") {
+        target = "binary.apk";
+    } else {
+        target = "binary.zip";
+    }
     var link = document.createElement('a');
-    link.href = document.getElementById("exportUrl").value + "/" + sha + "/" +
-        plateform + "/" + architecture + "/" + output;
-
-    var myWhiteDiv = await getQrCode(document.getElementById("exportUrl").value, sha, plateform, architecture, output, 130);
+    link.href = document.getElementById("exportUrl").value + "/" + sha + "/" + plat + "/" + arch + "/" + target;
+    var myWhiteDiv = await getQrCode(document.getElementById("exportUrl").value, sha, plat, arch, target, 130);
 
     div.appendChild(link);
     link.appendChild(myWhiteDiv);
