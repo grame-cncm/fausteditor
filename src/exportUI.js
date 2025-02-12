@@ -63,7 +63,7 @@ export async function updateQrCode(sha, div) {
     // Check the different possible targets
     if (arch === "pwa" || arch === "pwa-poly") {
         target = "index.html";
-    } else if (plat === "chaos-stratus") {
+    } else if (plat === "chaos-stratus" && arch === "effect-installer") {
         target = "installer.sh"
     } else if (plat === "android") {
         target = "binary.apk";
