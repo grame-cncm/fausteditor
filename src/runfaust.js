@@ -57,13 +57,13 @@ export function setSampleFormat(sample_item) {
 
 // MIDI input handling
 function keyOn(channel, pitch, velocity) {
-    if (DSP && isPoly) {
+    if (DSP) {
         DSP.keyOn(channel, pitch, velocity);
     }
 }
 
 function keyOff(channel, pitch, velocity) {
-    if (DSP && isPoly) {
+    if (DSP) {
         DSP.keyOff(channel, pitch, velocity);
     }
 }
@@ -85,7 +85,6 @@ function midiMessageReceived(ev) {
     var channel = ev.data[0] & 0xf;
     var data1 = ev.data[1];
     var data2 = ev.data[2];
-
     if (channel === 9) {
         return;
     } else if (cmd === 8 || ((cmd === 9) && (data2 === 0))) {
