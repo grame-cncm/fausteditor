@@ -10,6 +10,10 @@ The editor engine is based on [CodeMirror](https://codemirror.net/). It provides
 
 ![](/images/editor-doc.png)
 
+### Resetting parameters to their default value 
+
+You can double-click knobs or sliders to reset them, or on the group label to reset all its children. 
+
 ## Recommended Browsers
 
 The recommended browsers are the latest versions of Firefox and Chrome.
