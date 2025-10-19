@@ -1,6 +1,8 @@
-/*
-        A Faustlive like Web application.
-*/
+/**
+ * Faust Editor front-end: orchestrates CodeMirror, UI wiring, and Faust WASM integration.
+ * Exposes functions that handle file management, compilation triggers, and documentation links.
+ */
+
 import CodeMirror from "codemirror";
 import "codemirror/mode/clike/clike";
 import "./codemirror/mode/faust/faust.js";
@@ -85,6 +87,9 @@ if (!textarea) {
     throw new Error("Faust editor textarea not found");
 }
 
+/**
+ * Main CodeMirror instance used to edit Faust source.
+ */
 export var codeEditor = CodeMirror.fromTextArea(textarea, {
     lineNumbers: true,
     mode: 'faust',
@@ -101,12 +106,20 @@ export var codeEditor = CodeMirror.fromTextArea(textarea, {
 const filenameInput = document.getElementById('filename');
 const isExternalUrl = (value) => Boolean(value) && !value.toLowerCase().startsWith('file:');
 
+/**
+ * Reflect the active filename in the UI input.
+ * @param {string} name
+ */
 function setActiveFilename(name) {
     if (filenameInput && name) {
         filenameInput.value = name;
     }
 }
 
+/**
+ * Replace the editor contents with freshly loaded Faust code.
+ * @param {string} code
+ */
 function applyLoadedCode(code) {
     if (code !== undefined && code !== null) {
         dsp_code = code;
@@ -114,6 +127,11 @@ function applyLoadedCode(code) {
     }
 }
 
+/**
+ * Read a dropped or uploaded file as UTF-8 text.
+ * @param {File} file
+ * @returns {Promise<string>}
+ */
 function readFileAsText(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -123,6 +141,11 @@ function readFileAsText(file) {
     });
 }
 
+/**
+ * Resolve Faust code content from a drag/drop or input event.
+ * @param {DragEvent | InputEvent} event
+ * @returns {Promise<string|null>}
+ */
 async function resolveCodeFromEvent(event) {
     const { dataTransfer, target } = event;
 
@@ -160,6 +183,10 @@ async function resolveCodeFromEvent(event) {
     return null;
 }
 
+/**
+ * Handler for drop events that loads code into the editor.
+ * @param {DragEvent} event
+ */
 async function uploadFile(event) {
     fileDragHover(event);
     try {
@@ -176,15 +203,26 @@ async function uploadFile(event) {
 }
 
 
+/**
+ * Prevent default browser behaviour while dragging files over the drop zone.
+ * @param {DragEvent} e
+ */
 function fileDragHover(e) {
     e.stopPropagation();
     e.preventDefault();
 }
 
+/**
+ * Push the current `dsp_code` string into CodeMirror.
+ */
 function updateDSPCode() {
     codeEditor.setValue(dsp_code);
 }
 
+/**
+ * Attach drag-and-drop listeners to the provided zone id.
+ * @param {string} zoneid
+ */
 function configureDropZone(zoneid) {
     var filedrag1 = document.getElementById(zoneid);
     filedrag1.addEventListener('dragover', fileDragHover, false);
@@ -192,6 +230,11 @@ function configureDropZone(zoneid) {
     filedrag1.addEventListener('drop', uploadFile, false);
 }
 
+/**
+ * Trigger a browser download for the supplied text.
+ * @param {string} filename
+ * @param {string} text
+ */
 function download(filename, text) {
     var element = document.createElement('a');
     element.setAttribute(
@@ -210,6 +253,9 @@ function download(filename, text) {
 //-----------------------------------------------------------------------
 
 // Save section
+/**
+ * Download the current Faust source as a local file.
+ */
 export function saveFaustCode() {
     console.log('save faust code');
     download(document.getElementById('filename').value, codeEditor.getValue());
@@ -217,6 +263,10 @@ export function saveFaustCode() {
 
 // Read faust source file from file system
 // e: event
+/**
+ * Load a selected file from the file input element into CodeMirror.
+ * @param {Event} evt
+ */
 function readSourceFile(evt) {
     var file = evt.target.files[0];
     if (!file) {
@@ -232,6 +282,9 @@ function readSourceFile(evt) {
 }
 
 // Load Faust file from local file system via #fileinput element
+/**
+ * Open the hidden file input to load Faust source from disk.
+ */
 export function loadFaustCode() {
     console.log('load faust code');
     var gFileInput = document.getElementById('fileinput');
@@ -257,6 +310,9 @@ export function loadFaustCode() {
 // https://faust.grame.fr/editor/?buffer=256&poly=on&nvoices=4&code=https://raw.githubusercontent.com/grame-cncm/faust/master-dev/tests/architecture-tests/organ.dsp
 // https://faust.grame.fr/editor/?inline=cHJvY2VzcyA9ICs7IC8vIHRlc3Q
 
+/**
+ * Initialise the editor using query-string parameters when present.
+ */
 function configureEditorFromUrlParams() {
     var params = new URLSearchParams(window.location.search);
 
@@ -302,6 +358,10 @@ function configureEditorFromUrlParams() {
 //-----------------------------------------------------------------------
 
 // an event handler that runs or stop the faust code (CTRL-R)
+/**
+ * Listen for Ctrl+R to toggle DSP execution.
+ * @param {KeyboardEvent} ev
+ */
 function ctrlRunFaustCode(ev) {
     if (ev.ctrlKey && ev.key == 'r') {
         startStopFaustCode();
@@ -309,6 +369,9 @@ function ctrlRunFaustCode(ev) {
 }
 
 // Start or Stop Faust Code
+/**
+ * Toggle between running and stopping the current DSP.
+ */
 function startStopFaustCode() {
     if (isFaustCodeRunning()) {
         stopFaustCode()
@@ -318,11 +381,18 @@ function startStopFaustCode() {
 }
 
 // Check if the Faust Code is running or not
+/**
+ * Determine whether the Faust UI modal is currently visible.
+ * @returns {boolean}
+ */
 function isFaustCodeRunning() {
     return document.getElementById('faustuiwrapper').style.display == 'block';
 }
 
 // Run the Faust Code
+/**
+ * Compile and start the DSP currently present in the editor.
+ */
 function runFaustCode() {
     audio_context.resume();
     dsp_code = codeEditor.getValue();
@@ -332,6 +402,9 @@ function runFaustCode() {
     compileDSP();
 }
 
+/**
+ * Enable primary action buttons once the editor is initialised.
+ */
 function activateButtons() {
     // Setup the click action
     var div1 = document.querySelector('#run');
@@ -347,6 +420,9 @@ function activateButtons() {
     div3.onclick = openBlockDiagram;
 }
 
+/**
+ * Attach event listeners to toolbar controls and configuration UI.
+ */
 function wireUiEvents() {
     const getElement = (id) => document.getElementById(id);
 
@@ -434,6 +510,9 @@ function wireUiEvents() {
 }
 
 // Stop the currently running Faust code
+/**
+ * Stop DSP processing and hide the Faust UI modal.
+ */
 export function stopFaustCode() {
     console.log('stop faust code');
 
@@ -448,11 +527,21 @@ export function stopFaustCode() {
 //-----------------------------------------------------------------------
 
 // Left-extend a position by 3 characters
+/**
+ * Move caret position three characters to the left (used for prefix detection).
+ * @param {{line:number, ch:number}} pos
+ * @returns {{line:number, ch:number}}
+ */
 function back3ch(pos) {
     return { 'line': pos.line, 'ch': pos.ch - 3 };
 }
 
 // Test is a character is alpha numeric
+/**
+ * Check whether a character code corresponds to an alphanumeric character.
+ * @param {number} code
+ * @returns {boolean}
+ */
 function isAlphaNumeric(code) {
     return (
         (code > 47 && code < 58) ||  // numeric (0-9)
@@ -461,11 +550,22 @@ function isAlphaNumeric(code) {
 }
 
 // Test if a string is a two letters library prefix: 'xx.'
+/**
+ * Determine if the given string looks like a Faust library prefix (e.g. "fi.").
+ * @param {string} str
+ * @returns {boolean}
+ */
 function isLibPrefix(str) {
     return (str.length == 3) && isAlphaNumeric(str.charCodeAt(0)) &&
         isAlphaNumeric(str.charCodeAt(1)) && (str.charCodeAt(2) == 46);
 }
 
+/**
+ * Build the documentation URL for the provided word and cursor position.
+ * @param {string} word
+ * @param {{anchor:{line:number,ch:number}, head:{line:number,ch:number}}} pos
+ * @returns {string}
+ */
 function buildDocURL(word, pos) {
     // console.log("We are inside a word, left-extend 3 characters
     // to get the prefix 'xx.'");
@@ -486,6 +586,9 @@ function buildDocURL(word, pos) {
 
 // Open the documentation for the function under the cursor,
 // handle special case at the end of a word.
+/**
+ * Open the Faust documentation page related to the current selection or cursor.
+ */
 export function faustDocumentation() {
     // console.log("open Faust documentation");
     let word = codeEditor.getSelection();
@@ -524,6 +627,9 @@ export function faustDocumentation() {
 // Block diagram visualization
 //-----------------------------------------------------------------------
 
+/**
+ * Request the FaustWeb service to render a block diagram for the current DSP.
+ */
 async function openBlockDiagram() {
     if (expandDSP(codeEditor.getValue())) {
         console.log('open block diagram visualisation');
@@ -543,6 +649,10 @@ async function openBlockDiagram() {
     }
 }
 
+/**
+ * Open the generated block diagram in a new browser tab.
+ * @param {string} key
+ */
 function trigBlockDiagram(key) {
     console.log('We got the key', key);
     console.log(
@@ -559,6 +669,9 @@ function trigBlockDiagram(key) {
 // Export Dialog
 //-----------------------------------------------------------------------
 
+/**
+ * Display the export modal after validating the current DSP source.
+ */
 function openExportDialog() {
     if (expandDSP(codeEditor.getValue())) {
         console.log('open Export Dialog');
@@ -572,24 +685,37 @@ function openExportDialog() {
     }
 }
 
+/**
+ * Hide the export modal and reset its loading state.
+ */
 export function closeExportDialog() {
     console.log('close Export Dialog');
     document.getElementById('exportwrapper').style.display = 'none';
 }
 
 // startWaitingQrCode: show spinning gear
+/**
+ * Show the spinner while waiting for a QR code payload.
+ */
 function startWaitingQrCode() {
     console.log('start Waiting QrCode');
     document.getElementById('loader').style.display = 'block';
 }
 
 // startWaitingQrCode: hide spinning gear
+/**
+ * Hide the spinner once a QR code payload has been processed.
+ */
 function stopWaitingQrCode() {
     console.log('stop Waiting QrCode');
     document.getElementById('loader').style.display = 'none';
 }
 
 // trigCompilation: sendPrecompileRequest : show QrCode if success
+/**
+ * Send a remote compilation request and refresh the QR code preview.
+ * @param {string} key
+ */
 async function trigCompilation(key) {
     console.log('trigCompilation ' + key);
     var plateform =
@@ -617,6 +743,9 @@ async function trigCompilation(key) {
 
 // exportFaustSource: send sourcecode to export URL : get back shakey and trig
 // compilation if success
+/**
+ * Upload the current DSP to FaustWeb and display resulting build artefacts.
+ */
 export async function exportFaustSource() {
     try {
         const sha = await getSHAKey(
@@ -644,11 +773,17 @@ export async function exportFaustSource() {
 // Config Dialog
 //-----------------------------------------------------------------------
 
+/**
+ * Display the configuration modal to adjust runtime options.
+ */
 export function openConfigDialog() {
     console.log('Open Configuration Dialog');
     document.getElementById('configwrapper').style.display = 'block';
 }
 
+/**
+ * Hide the configuration modal.
+ */
 export function closeConfigDialog() {
     console.log('Close Configuration Dialog');
     document.getElementById('configwrapper').style.display = 'none';
@@ -705,6 +840,9 @@ window.addEventListener('touchstart', function () {
 //-----------------------------------------------------------------------
 
 // Main entry point, called when libfaust.js has finished to load
+/**
+ * Bootstraps the editor once the Faust WASM module is available.
+ */
 function init() {
     console.log('FaustEditor: version 1.5.5');
 

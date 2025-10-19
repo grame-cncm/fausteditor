@@ -28,6 +28,10 @@ This document records the structural refactor completed on the `refactor-editor-
 - Added ESLint (`package.json`, `.eslintrc.cjs`) and a `npm run lint` script to catch regressions in `src/`.
 - Documented each major migration in `docs/steps/step-01-setup.md` through `step-04-tooling.md` for granular traceability.
 
+## Documentation Pass
+
+- Added module headers and JSDoc-style comments to `src/compilefaust.js`, `src/faustlive.js`, and `src/runfaust.js` to describe helper responsibilities and function behaviour.
+
 ## Build Verification
 
 - `npm run build` succeeds and emits the optimized Vite bundle. Vite warns that Node.js 20.9.0 is below the preferred 20.19.0; upgrading Node will quiet the notice but is not required for the build to pass.

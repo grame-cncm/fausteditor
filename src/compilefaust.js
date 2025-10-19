@@ -1,3 +1,9 @@
+/**
+ * Faust Editor DSP compilation utilities.
+ * Provides helpers to translate source code into WebAudio nodes and keep
+ * runtime state in sync with the UI.
+ */
+
 import { dsp_code } from "./faustlive";
 import { activateAudioInput, audio_input, buffer_size, checkPolyphonicDSP, ftz_flag, loadDSPState, poly_flag, poly_nvoices, rendering_mode, sample_format, resetAudioInput } from "./runfaust";
 import { FaustUI } from "@shren/faust-ui";
@@ -20,6 +26,11 @@ export var DSP = null;
 
 const faustUIRoot = document.getElementById("faust-ui");
 let faustUI;
+/**
+ * Propagate DSP parameter updates back into the UI.
+ * @param {string} path
+ * @param {number} value
+ */
 export const output_handler = (path, value) => faustUI.paramChangeByDSP(path, value);
 
 var midi_input = [];
@@ -35,12 +46,19 @@ if (qm > 0) {
 var libraries_url = wurl.substr(0, wurl.lastIndexOf('/')) + "/libraries/";
 console.log("URL:", libraries_url);
 
+/**
+ * Detect whether the current runtime supports AudioWorklets.
+ * @returns {boolean} true when AudioWorklet is available in an OfflineAudioContext.
+ */
 export function workletAvailable() {
     if (typeof (OfflineAudioContext) === "undefined") return false;
     var context = new OfflineAudioContext(1, 1, 44100);
     return context.audioWorklet && typeof context.audioWorklet.addModule === 'function';
 }
 
+/**
+ * Tear down the currently active DSP node and its associated UI.
+ */
 export function deleteDSP() {
     if (DSP) {
         if (audio_input) {
@@ -55,6 +73,10 @@ export function deleteDSP() {
     }
 }
 
+/**
+ * Initialise common DSP resources and UI for the provided node.
+ * @param {import("@grame/faustwasm").FaustBaseWebAudioNode} dsp
+ */
 function activateDSP(dsp) {
     if (dsp) {
         DSP = dsp;
@@ -82,15 +104,27 @@ function activateDSP(dsp) {
     }
 }
 
+/**
+ * Wrapper that activates a mono DSP node.
+ * @param {import("@grame/faustwasm").FaustBaseWebAudioNode} dsp
+ */
 function activateMonoDSP(dsp) {
     activateDSP(dsp);
 }
 
+/**
+ * Wrapper that activates a polyphonic DSP node and validates its JSON mapping.
+ * @param {import("@grame/faustwasm").FaustBaseWebAudioNode} dsp
+ */
 function activatePolyDSP(dsp) {
     activateDSP(dsp);
     checkPolyphonicDSP(dsp.getJSON());
 }
 
+/**
+ * Instantiate a mono DSP node from the compiled factory.
+ * @param {import("@grame/faustwasm").FaustMonoFactory} factory
+ */
 async function compileMonoDSP(factory) {
     if (!factory) {
         alert('Faust DSP Factory not compiled');
@@ -107,6 +141,11 @@ async function compileMonoDSP(factory) {
     }
 }
 
+/**
+ * Instantiate a polyphonic DSP node from the compiled factories.
+ * @param {import("@grame/faustwasm").FaustPolyFactory} voiceFactory
+ * @param {import("@grame/faustwasm").FaustPolyFactory} [effectFactory]
+ */
 async function compilePolyDSP(voiceFactory, effectFactory) {
     if (!voiceFactory) {
         alert('Faust DSP Factory not compiled');
@@ -123,6 +162,9 @@ async function compilePolyDSP(voiceFactory, effectFactory) {
     }
 }
 
+/**
+ * Compile the current DSP source to either a mono or polyphonic node.
+ */
 export async function compileDSP() {
     deleteDSP();
 
@@ -166,6 +208,11 @@ export async function compileDSP() {
     }
 }
 
+/**
+ * Expand Faust source using the current compiler options for validation.
+ * @param {string} dsp_code
+ * @returns {string}
+ */
 export function expandDSP(dsp_code) {
     // Prepare argv list
     var argv = [];

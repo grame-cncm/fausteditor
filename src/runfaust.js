@@ -1,3 +1,8 @@
+/**
+ * Faust Editor runtime configuration helpers.
+ * Manages buffer sizes, MIDI routing, audio input capture, and local storage.
+ */
+
 import { audio_context, DSP, isPoly, output_handler } from "./compilefaust";
 import { codeEditor } from "./faustlive";
 import { getStorageItemValue, setStorageItemValue } from "./utils/local-storage";
@@ -11,6 +16,10 @@ export var sample_format = "float";
 export var poly_nvoices = 16;
 export var rendering_mode = "ScriptProcessor";
 
+/**
+ * Update the processing buffer size from the configuration menu.
+ * @param {HTMLSelectElement} bs_item
+ */
 export function setBufferSize(bs_item) {
     buffer_size = parseInt(bs_item.options[bs_item.selectedIndex].value);
     if (buffer_size === 128 && rendering_mode === "ScriptProcessor") {
@@ -21,21 +30,37 @@ export function setBufferSize(bs_item) {
     console.log("setBufferSize", buffer_size);
 }
 
+/**
+ * Toggle polyphonic mode based on user selection.
+ * @param {HTMLSelectElement} poly_item
+ */
 export function setPoly(poly_item) {
     poly_flag = poly_item.options[poly_item.selectedIndex].value;
     console.log("setPoly", poly_flag);
 }
 
+/**
+ * Adjust the number of polyphonic voices.
+ * @param {HTMLSelectElement} voices_item
+ */
 export function setPolyVoices(voices_item) {
     poly_nvoices = parseInt(voices_item.options[voices_item.selectedIndex].value, 10);
     console.log("setPolyVoices", poly_nvoices);
 }
 
 // TODO(ijc): Unused?
+/**
+ * Update the flush-to-zero compiler flag.
+ * @param {HTMLSelectElement} ftz_item
+ */
 export function setFTZ(ftz_item) {
     ftz_flag = ftz_item.options[ftz_item.selectedIndex].value;
 }
 
+/**
+ * Change the audio rendering backend between ScriptProcessor and AudioWorklet.
+ * @param {HTMLSelectElement} rendering_item
+ */
 export function setRenderingMode(rendering_item) {
     rendering_mode = rendering_item.options[rendering_item.selectedIndex].value;
     if (rendering_mode === "AudioWorklet") {
@@ -50,36 +75,67 @@ export function setRenderingMode(rendering_item) {
     }
 }
 
+/**
+ * Switch the sample format compiler option.
+ * @param {HTMLSelectElement} sample_item
+ */
 export function setSampleFormat(sample_item) {
     sample_format = sample_item.options[sample_item.selectedIndex].value;
     console.log("setSampleFormat", sample_format);
 }
 
 // MIDI input handling
+/**
+ * Forward a MIDI note-on event to the DSP node.
+ * @param {number} channel
+ * @param {number} pitch
+ * @param {number} velocity
+ */
 function keyOn(channel, pitch, velocity) {
     if (DSP) {
         DSP.keyOn(channel, pitch, velocity);
     }
 }
 
+/**
+ * Forward a MIDI note-off event to the DSP node.
+ * @param {number} channel
+ * @param {number} pitch
+ * @param {number} velocity
+ */
 function keyOff(channel, pitch, velocity) {
     if (DSP) {
         DSP.keyOff(channel, pitch, velocity);
     }
 }
 
+/**
+ * Forward pitch bend data to the DSP node.
+ * @param {number} channel
+ * @param {number} bend
+ */
 function pitchWheel(channel, bend) {
     if (DSP) {
         DSP.pitchWheel(channel, bend);
     }
 }
 
+/**
+ * Forward a MIDI control change event to the DSP node.
+ * @param {number} channel
+ * @param {number} ctrl
+ * @param {number} value
+ */
 function ctrlChange(channel, ctrl, value) {
     if (DSP) {
         DSP.ctrlChange(channel, ctrl, value);
     }
 }
 
+/**
+ * Decode incoming MIDI messages and dispatch them to the DSP helpers.
+ * @param {MessageEvent} ev
+ */
 function midiMessageReceived(ev) {
     var cmd = ev.data[0] >> 4;
     var channel = ev.data[0] & 0xf;
@@ -98,10 +154,18 @@ function midiMessageReceived(ev) {
     }
 }
 
+/**
+ * Log a Web MIDI API failure.
+ * @param {unknown} error
+ */
 function onerrorcallback(error) {
     console.log(error);
 }
 
+/**
+ * Register listeners on all available MIDI inputs.
+ * @param {WebMidi.MIDIAccess} access
+ */
 function onsuccesscallbackStandard(access) {
     access.onstatechange = function (e) {
         if (e.port.type === "input") {
@@ -121,6 +185,9 @@ function onsuccesscallbackStandard(access) {
     }
 }
 
+/**
+ * Enable Web MIDI input when supported by the browser.
+ */
 export function activateMIDIInput() {
     console.log("activateMIDIInput");
     if (typeof (navigator.requestMIDIAccess) !== "undefined") {
@@ -137,12 +204,20 @@ const audioConstraints = {
     audio: { echoCancellation: false, autoGainControl: false, noiseSuppression: false }
 };
 
+/**
+ * Handle audio-capture failures triggered while requesting microphone access.
+ * @param {unknown} error
+ */
 function handleAudioInputError(error) {
     alert('Error getting audio input');
     console.log(error);
     audio_input = null;
 }
 
+/**
+ * Attach the captured audio stream to the DSP node.
+ * @param {MediaStream} device
+ */
 function attachAudioInput(device) {
     // Create an AudioNode from the stream.
     audio_input = audio_context.createMediaStreamSource(device);
@@ -151,6 +226,9 @@ function attachAudioInput(device) {
     audio_input.connect(DSP);
 }
 
+/**
+ * Request audio input access from the browser and attach it to the DSP node.
+ */
 export async function activateAudioInput() {
     console.log("activateAudioInput");
     if (navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === "function") {
@@ -174,21 +252,38 @@ export async function activateAudioInput() {
 
 // Save/Load functions using local storage
 
+/**
+ * Persist the local storage toggle state.
+ * @param {boolean} state
+ */
 export function setLocalStorage(state) {
     console.log(state);
     setStorageItemValue('FaustEditor', 'FaustLocalStorage', ((state) ? "on" : "off"));
 }
 
+/**
+ * Persist whether DSP parameter values should be stored.
+ * @param {boolean} state
+ */
 export function setDSPStorage(state) {
     console.log(state);
     setStorageItemValue('FaustEditor', 'FaustDSPStorage', ((state) ? "on" : "off"));
 }
 
+/**
+ * Persist whether the DSP source should be stored in local storage.
+ * @param {boolean} state
+ */
 export function setSourceStorage(state) {
     console.log(state);
     setStorageItemValue('FaustEditor', 'FaustSourceStorage', ((state) ? "on" : "off"));
 }
 
+/**
+ * Update a select element to reflect a stored value.
+ * @param {string} id
+ * @param {string|number} value
+ */
 function restoreMenu(id, value) {
     if (document.getElementById(id)) {
         for (var i = 0; i < document.getElementById(id).length; i++) {
@@ -201,6 +296,9 @@ function restoreMenu(id, value) {
     }
 }
 
+/**
+ * Store current DSP parameter values when DSP storage is enabled.
+ */
 export function saveDSPState() {
     if (getStorageItemValue('FaustEditor', 'FaustDSPStorage') === "on") {
         var params = DSP.getParams();
@@ -210,6 +308,9 @@ export function saveDSPState() {
     }
 }
 
+/**
+ * Restore DSP parameter values from local storage.
+ */
 export function loadDSPState() {
     if (getStorageItemValue('FaustEditor', 'FaustDSPStorage') === "on") {
         var params = DSP.getParams();
@@ -225,6 +326,9 @@ export function loadDSPState() {
     }
 }
 
+/**
+ * Persist the current editor configuration to local storage.
+ */
 export function savePageState() {
     if (getStorageItemValue('FaustEditor', 'FaustLocalStorage') === "on") {
         setStorageItemValue('FaustEditor', 'buffer_size', buffer_size);
@@ -241,6 +345,9 @@ export function savePageState() {
     }
 }
 
+/**
+ * Sync configuration menus with the in-memory runtime state.
+ */
 export function restoreMenus() {
     // Restore menus
     restoreMenu("selectedBuffer", buffer_size);
@@ -257,6 +364,9 @@ export function restoreMenus() {
     }
 }
 
+/**
+ * Restore runtime configuration and optionally source code from local storage.
+ */
 export function loadPageState() {
     if (getStorageItemValue('FaustEditor', 'FaustLocalStorage') === "on") {
 
@@ -282,6 +392,10 @@ export function loadPageState() {
     }
 }
 
+/**
+ * Validate that a DSP JSON description contains polyphonic controls.
+ * @param {string} json
+ */
 export function checkPolyphonicDSP(json) {
     const hasFreqOrKey = json.includes("/freq") || json.includes("/key");
     const hasGainOrVel = json.includes("/gain") || json.includes("/vel");
