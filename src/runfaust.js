@@ -9,12 +9,13 @@ import { getStorageItemValue, setStorageItemValue } from "./utils/local-storage"
 
 export var buffer_size = 1024;
 export var audio_input = null;
-export function resetAudioInput() { audio_input = null; }
 export var poly_flag = "OFF";
 export var ftz_flag = "2";
 export var sample_format = "float";
 export var poly_nvoices = 16;
 export var rendering_mode = "ScriptProcessor";
+
+export function resetAudioInput() { audio_input = null; }
 
 /**
  * Update the processing buffer size from the configuration menu.

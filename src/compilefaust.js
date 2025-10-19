@@ -34,10 +34,6 @@ let faustUI;
  */
 export const output_handler = (path, value) => faustUI.paramChangeByDSP(path, value);
 
-var midi_input = [];
-var factory_stack = [];
-var faust_svg = null;
-
 // compute libraries URL relative to current page
 var wurl = window.location.href;
 var qm = wurl.indexOf('?');
