@@ -2,12 +2,12 @@ import CodeMirror from "codemirror";
 
 var keywords =
     "process component import library declare with environment route waveform soundfile"
-    .split(" ");
+        .split(" ");
 var blockKeywords = "";
 var builtins = "";
 var atoms =
     "mem prefix int float rdtable rwtable select2 select3 ffunction fconstant fvariable button checkbox vslider hslider nentry vgroup hgroup tgroup vbargraph hbargraph attach acos asin atan atan2 cos sin tan exp log log10 pow sqrt abs min max fmod remainder floor ceil rint round"
-    .split(" ");
+        .split(" ");
 
 function set(words) {
     var obj = {};
