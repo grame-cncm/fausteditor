@@ -32,6 +32,11 @@ This document records the structural refactor completed on the `refactor-editor-
 
 - Added module headers and JSDoc-style comments to `src/compilefaust.js`, `src/faustlive.js`, and `src/runfaust.js` to describe helper responsibilities and function behaviour.
 
+## WASM Demo Modernization
+
+- Updated `faustlive-wasm.html` to drop inline handlers and rely on module wiring.
+- Refreshed `src/faustlive-wasm.js` with async fetch-based loading, shared storage utilities, and centralised UI event binding for the WASM demo.
+
 ## Build Verification
 
 - `npm run build` succeeds and emits the optimized Vite bundle. Vite warns that Node.js 20.9.0 is below the preferred 20.19.0; upgrading Node will quiet the notice but is not required for the build to pass.

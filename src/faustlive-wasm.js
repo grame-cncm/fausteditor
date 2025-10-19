@@ -1,7 +1,14 @@
 // @ts-check
+/**
+ * Faust live WASM demo bootstrapper.
+ * Handles drag-and-drop compilation, configuration menus, and runtime state
+ * for a lightweight Faust compiler showcase.
+ */
 import jsURL from "@grame/faustwasm/libfaust-wasm/libfaust-wasm.js?url"
 import dataURL from "@grame/faustwasm/libfaust-wasm/libfaust-wasm.data?url"
 import wasmURL from "@grame/faustwasm/libfaust-wasm/libfaust-wasm.wasm?url"
+import { fetchText } from "./utils/network"
+import { getStorageItemValue, setStorageItemValue } from "./utils/local-storage"
 
 /** @type {typeof AudioContext} */
 const AudioContextConstructor = globalThis.AudioContext || globalThis.webkitAudioContext;
@@ -50,6 +57,9 @@ let output_handler = (path, value) => faustUI.paramChangeByDSP(path, value);
  * @param {HTMLSelectElement} bs_item 
  */
 export const setBufferSize = (bs_item) => {
+    if (!bs_item) {
+        return;
+    }
     buffer_size = parseInt(bs_item.options[bs_item.selectedIndex].value);
     if (buffer_size === 128 && rendering_mode === "ScriptProcessor") {
         console.log("buffer_size cannot be set to 128 in ScriptProcessor mode !");
@@ -63,6 +73,9 @@ export const setBufferSize = (bs_item) => {
  * @param {HTMLSelectElement} poly_item 
  */
 export const setPoly = (poly_item) => {
+    if (!poly_item) {
+        return;
+    }
     poly_flag = poly_item.options[poly_item.selectedIndex].value;
     compileDSP();
 }
@@ -71,6 +84,9 @@ export const setPoly = (poly_item) => {
  * @param {HTMLSelectElement} voices_item 
  */
 export const setPolyVoices = (voices_item) => {
+    if (!voices_item) {
+        return;
+    }
     poly_nvoices = parseInt(voices_item.options[voices_item.selectedIndex].value);
     compileDSP();
 }
@@ -79,17 +95,24 @@ export const setPolyVoices = (voices_item) => {
  * @param {HTMLSelectElement} rendering_item 
  */
 export const setRenderingMode = (rendering_item) => {
+    if (!rendering_item) {
+        return;
+    }
     rendering_mode = rendering_item.options[rendering_item.selectedIndex].value;
     /** @type {HTMLSelectElement} */
     const selectedBuffer = document.getElementById("selectedBuffer");
     if (rendering_mode === "AudioWorklet") {
         buffer_size = 128;
         restoreMenu("selectedBuffer", buffer_size.toString());
-        selectedBuffer.disabled = true;
+        if (selectedBuffer) {
+            selectedBuffer.disabled = true;
+        }
     } else {
         buffer_size = 1024;
         restoreMenu("selectedBuffer", buffer_size.toString());
-        selectedBuffer.disabled = false;
+        if (selectedBuffer) {
+            selectedBuffer.disabled = false;
+        }
     }
     compileDSP();
 }
@@ -98,6 +121,9 @@ export const setRenderingMode = (rendering_item) => {
  * @param {HTMLSelectElement} ftz_item 
  */
 export const setFTZ = (ftz_item) => {
+    if (!ftz_item) {
+        return;
+    }
     ftz_flag = ftz_item.options[ftz_item.selectedIndex].value;
     compileDSP();
 }
@@ -106,6 +132,9 @@ export const setFTZ = (ftz_item) => {
  * @param {HTMLSelectElement} sample_item 
  */
 export const setSampleFormat = (sample_item) => {
+    if (!sample_item) {
+        return;
+    }
     sample_format = sample_item.options[sample_item.selectedIndex].value;
     compileDSP();
 }
@@ -268,49 +297,6 @@ const restoreMenu = (id, value) => {
     }
 }
 
-/**
- * set item from local storage 'item_key' key
- * 
- * @param {string} item_key 
- * @param {string} key 
- * @returns 
- */
-const getStorageItemValue = (item_key, key) => {
-    if (localStorage.getItem(item_key)) {
-        var item_value = JSON.parse(localStorage.getItem(item_key));
-        var item_index = item_value.findIndex((obj => obj[0] === key));
-        return (item_index >= 0) ? item_value[item_index][1] : null;
-    } else {
-        return null;
-    }
-}
-
-/**
- * get [key, value] in local storage item_key key
- * @param {string} item_key 
- * @param {string} key 
- * @param {string} value 
- */
-const setStorageItemValue = (item_key, key, value) => {
-    var item_value;
-    if (localStorage.getItem(item_key)) {
-        item_value = JSON.parse(localStorage.getItem(item_key));
-    } else {
-        item_value = [];
-    }
-
-    // Possibly update an existing 'key'
-    var item_index = item_value.findIndex((obj => obj[0] === key));
-    if (item_index >= 0) {
-        item_value[item_index][1] = value;
-        // Otherwise push a new [key, value]
-    } else {
-        item_value.push([key, value]);
-    }
-
-    localStorage.setItem(item_key, JSON.stringify(item_value));
-}
-
 const saveDSPState = () => {
     var params = DSP.getParams();
     for (var i = 0; i < params.length; i++) {
@@ -333,23 +319,34 @@ const loadDSPState = () => {
 
 const savePageState = () => {
     if (getStorageItemValue('FaustLibTester', 'FaustLocalStorage') === "on") {
-        setStorageItemValue('FaustLibTester', 'buffer_size', buffer_size.toString());
+        setStorageItemValue('FaustLibTester', 'buffer_size', buffer_size);
         setStorageItemValue('FaustLibTester', 'poly_flag', poly_flag);
         setStorageItemValue('FaustLibTester', 'ftz_flag', ftz_flag);
         setStorageItemValue('FaustLibTester', 'sample_format', sample_format);
-        setStorageItemValue('FaustLibTester', 'poly_nvoices', poly_nvoices.toString());
+        setStorageItemValue('FaustLibTester', 'poly_nvoices', poly_nvoices);
         setStorageItemValue('FaustLibTester', 'rendering_mode', rendering_mode);
     }
 }
 
 const loadPageState = () => {
     if (getStorageItemValue('FaustLibTester', 'FaustLocalStorage') === "on") {
-        buffer_size = (getStorageItemValue('FaustLibTester', 'buffer_size') ? getStorageItemValue('FaustLibTester', 'buffer_size') : 256);
-        poly_flag = (getStorageItemValue('FaustLibTester', 'poly_flag') ? getStorageItemValue('FaustLibTester', 'poly_flag') : "OFF");
-        poly_nvoices = (getStorageItemValue('FaustLibTester', 'poly_nvoices') ? getStorageItemValue('FaustLibTester', 'poly_nvoices') : 16);
-        ftz_flag = (getStorageItemValue('FaustLibTester', 'ftz_flag') ? getStorageItemValue('FaustLibTester', 'ftz_flag') : 2);
-        sample_format = (getStorageItemValue('FaustLibTester', 'sample_format') ? getStorageItemValue('FaustLibTester', 'sample_format') : "float");
-        rendering_mode = (getStorageItemValue('FaustLibTester', 'rendering_mode') ? getStorageItemValue('FaustLibTester', 'rendering_mode') : "ScriptProcessor");
+        const storedBuffer = getStorageItemValue('FaustLibTester', 'buffer_size');
+        buffer_size = Number(storedBuffer ?? 256);
+        if (!Number.isFinite(buffer_size) || buffer_size <= 0) {
+            buffer_size = 256;
+        }
+
+        poly_flag = String(getStorageItemValue('FaustLibTester', 'poly_flag') ?? "OFF").toUpperCase();
+
+        const storedVoices = getStorageItemValue('FaustLibTester', 'poly_nvoices');
+        poly_nvoices = Number(storedVoices ?? 16);
+        if (!Number.isFinite(poly_nvoices) || poly_nvoices <= 0) {
+            poly_nvoices = 16;
+        }
+
+        ftz_flag = String(getStorageItemValue('FaustLibTester', 'ftz_flag') ?? "2");
+        sample_format = String(getStorageItemValue('FaustLibTester', 'sample_format') ?? "float");
+        rendering_mode = String(getStorageItemValue('FaustLibTester', 'rendering_mode') ?? "ScriptProcessor");
 
         // Restore menus
         restoreMenu("selectedBuffer", buffer_size.toString());
@@ -371,104 +368,73 @@ const loadPageState = () => {
 const fileDragHover = (e) => {
     e.stopPropagation();
     e.preventDefault();
-    e.target.className = (e.type === "dragover" ? "hover" : "");
+    const dropZone = document.getElementById("filedrag");
+    if (dropZone) {
+        dropZone.classList.toggle("hover", e.type === "dragover");
+    }
 }
 
-/**
- * @param {InputEvent} e 
- */
-const fileSelectHandler = (e) => {
-    fileDragHover(e);
-    /** @type {FileList} */
-    const files = e.target.files || e.dataTransfer.files;
-    uploadFile(files[0]);
-}
+const isExternalUrl = (value) => Boolean(value) && !value.toLowerCase().startsWith("file:");
 
 /**
- * @param {DragEvent} e
+ * @param {File} file
+ * @returns {Promise<string>}
  */
-const uploadOn = (e) => {
-    return new Promise((callback, reject) => {
-        if (!isWasm) {
-            alert("WebAssembly is not supported in this browser !");
-            reject("WebAssembly is not supported in this browser !");
-        }
+const readFileAsText = (file) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result ?? ""));
+    reader.onerror = () => reject(reader.error ?? new Error("Unable to read file"));
+    reader.readAsText(file);
+});
 
-        // CASE 1 : THE DROPPED OBJECT IS A URL TO SOME FAUST CODE
-        if (e.dataTransfer.getData('URL') && e.dataTransfer.getData('URL').split(':').shift() != "file") {
-            const url = e.dataTransfer.getData('URL');
-            let filename = url.toString().split('/').pop();
-            filename = filename.toString().split('.').shift();
-            const xmlhttp = new XMLHttpRequest();
+/**
+ * Resolve Faust code from a drop or input event.
+ * @param {DragEvent | InputEvent} event
+ * @returns {Promise<string|null>}
+ */
+const resolveCodeFromEvent = async (event) => {
+    if (!isWasm) {
+        alert("WebAssembly is not supported in this browser !");
+        return null;
+    }
 
-            xmlhttp.onreadystatechange = () => {
-                if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
-                    dsp_code = xmlhttp.responseText;
-                    callback(dsp_code);
-                }
-            }
-
+    const dataTransfer = "dataTransfer" in event ? event.dataTransfer : null;
+    if (dataTransfer) {
+        const url = dataTransfer.getData("URL");
+        if (isExternalUrl(url)) {
             try {
-                xmlhttp.open("GET", url, false);
-                // Avoid error "mal formé" on firefox
-                xmlhttp.overrideMimeType('text/html');
-                xmlhttp.send();
-            } catch (err) {
-                alert(err);
-                reject(err);
-            }
-
-        } else if (e.dataTransfer.getData('URL').split(':').shift() != "file") {
-            dsp_code = e.dataTransfer.getData('text');
-
-            // CASE 2 : THE DROPPED OBJECT IS SOME FAUST CODE
-            if (dsp_code) {
-                callback(dsp_code);
-            }
-            // CASE 3 : THE DROPPED OBJECT IS A FILE CONTAINING SOME FAUST CODE
-            else {
-                /** @type {FileList} */
-                const files = e.target.files || e.dataTransfer.files;
-                const file = files[0];
-
-                if (location.host.indexOf("sitepointstatic") >= 0) return;
-
-                const request = new XMLHttpRequest();
-                if (request.upload) {
-
-                    const reader = new FileReader();
-                    const ext = file.name.toString().split('.').pop();
-                    const filename = file.name.toString().split('.').shift();
-                    let type;
-
-                    if (ext === "dsp") {
-                        type = "dsp";
-                        reader.readAsText(file);
-                    } else if (ext === "json") {
-                        type = "json";
-                        reader.readAsText(file);
-                    }
-
-                    reader.onloadend = (e) => {
-                        dsp_code = reader.result;
-                        callback(dsp_code);
-                    };
-                }
+                return await fetchText(url, { mode: "cors" });
+            } catch (error) {
+                alert(error?.message ?? String(error));
+                throw error;
             }
         }
-        // CASE 4 : ANY OTHER STRANGE THING
-        else {
-            window.alert("This object is not Faust code...");
-            reject(new Error("This object is not Faust code..."));
+
+        const inlineCode = dataTransfer.getData("text");
+        if (inlineCode) {
+            return inlineCode;
         }
-    });
+
+        if (dataTransfer.files && dataTransfer.files.length > 0) {
+            return await readFileAsText(dataTransfer.files[0]);
+        }
+    }
+
+    const target = event.target;
+    if (target && "files" in target && target.files && target.files.length > 0) {
+        return await readFileAsText(target.files[0]);
+    }
+
+    return null;
 }
 
 const checkPolyphonicDSP = (json) => {
-    if (!(((json.indexOf("/freq") !== -1) || (json.indexOf("/key") !== -1))
-        && (json.indexOf("/gate") !== -1)
-        && ((json.indexOf("/gain") !== -1) || (json.indexOf("/vel") !== -1) || (json.indexOf("/velocity") !== -1)))) {
-        alert("Faust DSP code is not Polyphonic, it will probably not work correctly in this mode...")
+    const content = String(json ?? "");
+    const hasFreqOrKey = content.includes("/freq") || content.includes("/key");
+    const hasGain = content.includes("/gain") || content.includes("/vel") || content.includes("/velocity");
+    const hasGate = content.includes("/gate");
+    if (!(hasFreqOrKey && hasGain && hasGate)) {
+        alert("Faust DSP code is not Polyphonic, it will probably not work correctly in this mode...");
     }
 }
 
@@ -570,17 +536,53 @@ const compileDSP = async () => {
 }
 
 /**
- * @param {DragEvent} e 
+ * Handle a drop/input event by reading Faust code and recompiling the DSP.
+ * @param {DragEvent | InputEvent} event
  */
-const uploadFile = async (e) => {
-    fileDragHover(e);
-    await uploadOn(e);
-    compileDSP()
+const uploadFile = async (event) => {
+    fileDragHover(event);
+    try {
+        const code = await resolveCodeFromEvent(event);
+        if (code) {
+            dsp_code = code;
+            await compileDSP();
+        } else {
+            window.alert("This object is not Faust code...");
+        }
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+const wireConfigMenus = () => {
+    const bindSelect = (id, handler) => {
+        const element = document.getElementById(id);
+        if (element instanceof HTMLSelectElement) {
+            element.addEventListener("change", () => handler(element));
+        }
+    };
+
+    bindSelect("selectedBuffer", setBufferSize);
+    bindSelect("selectedPoly", setPoly);
+    bindSelect("polyVoices", setPolyVoices);
+    bindSelect("selectedRenderingMode", setRenderingMode);
+    bindSelect("selectedSampleFormat", setSampleFormat);
+    bindSelect("selectedFTZ", setFTZ);
+
+    const localStorageCheckbox = document.getElementById("localstorage");
+    if (localStorageCheckbox instanceof HTMLInputElement) {
+        localStorageCheckbox.addEventListener("change", () => setLocalStorage(localStorageCheckbox.checked));
+    }
 }
 
 const initPage = () => {
     // Restore 'save' checkbox state
-    document.getElementById("localstorage").checked = (getStorageItemValue('FaustLibTester', 'FaustLocalStorage') === "on");
+    const storageToggle = document.getElementById("localstorage");
+    if (storageToggle instanceof HTMLInputElement) {
+        const enabled = (getStorageItemValue('FaustLibTester', 'FaustLocalStorage') === "on");
+        storageToggle.checked = enabled;
+        setLocalStorage(enabled);
+    }
 
     // Load page state
     loadPageState();
@@ -617,6 +619,8 @@ const init = async () => {
     filedrag1.addEventListener("drop", uploadFile, false);
     filedrag1.textContent = "Drop a Faust .dsp file or URL here (compiled using libfaust version " + faust_compiler.version() + ")";
 }
+
+wireConfigMenus();
 
 // Init page
 initPage();
