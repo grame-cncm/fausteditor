@@ -27,7 +27,7 @@ export function setPoly(poly_item) {
 }
 
 export function setPolyVoices(voices_item) {
-    poly_nvoices = voices_item.options[voices_item.selectedIndex].value;
+    poly_nvoices = parseInt(voices_item.options[voices_item.selectedIndex].value, 10);
     console.log("setPolyVoices", poly_nvoices);
 }
 
@@ -133,31 +133,43 @@ export function activateMIDIInput() {
 }
 
 // Audio input handling
-export function activateAudioInput() {
-    console.log("activateAudioInput");
-    if (!navigator.getUserMedia) {
-        navigator.getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-    }
+const audioConstraints = {
+    audio: { echoCancellation: false, autoGainControl: false, noiseSuppression: false }
+};
 
-    if (navigator.getUserMedia) {
-        navigator.getUserMedia({
-            audio: { echoCancellation: false, autoGainControl: false, noiseSuppression: false }
-        }, getDevice, function (e) {
-            alert('Error getting audio input');
-            console.log(e);
-            audio_input = null;
-        });
-    } else {
-        alert('Audio input API not available');
-    }
+function handleAudioInputError(error) {
+    alert('Error getting audio input');
+    console.log(error);
+    audio_input = null;
 }
 
-function getDevice(device) {
+function attachAudioInput(device) {
     // Create an AudioNode from the stream.
     audio_input = audio_context.createMediaStreamSource(device);
 
     // Connect it to the destination.
     audio_input.connect(DSP);
+}
+
+export async function activateAudioInput() {
+    console.log("activateAudioInput");
+    if (navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === "function") {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia(audioConstraints);
+            attachAudioInput(stream);
+            return;
+        } catch (error) {
+            handleAudioInputError(error);
+            return;
+        }
+    }
+
+    const legacyGetUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+    if (legacyGetUserMedia) {
+        legacyGetUserMedia.call(navigator, audioConstraints, attachAudioInput, handleAudioInputError);
+    } else {
+        alert('Audio input API not available');
+    }
 }
 
 // Save/Load functions using local storage
@@ -248,12 +260,18 @@ export function restoreMenus() {
 export function loadPageState() {
     if (getStorageItemValue('FaustEditor', 'FaustLocalStorage') === "on") {
 
-        buffer_size = (getStorageItemValue('FaustEditor', 'buffer_size') ? getStorageItemValue('FaustEditor', 'buffer_size') : 1024);
-        poly_flag = (getStorageItemValue('FaustEditor', 'poly_flag') ? getStorageItemValue('FaustEditor', 'poly_flag') : "OFF");
-        poly_nvoices = (getStorageItemValue('FaustEditor', 'poly_nvoices') ? getStorageItemValue('FaustEditor', 'poly_nvoices') : 16);
-        ftz_flag = (getStorageItemValue('FaustEditor', 'ftz_flag') ? getStorageItemValue('FaustEditor', 'ftz_flag') : 2);
-        rendering_mode = (getStorageItemValue('FaustEditor', 'rendering_mode') ? getStorageItemValue('FaustEditor', 'rendering_mode') : "ScriptProcessor");
-        sample_format = (getStorageItemValue('FaustEditor', 'sample_format') ? getStorageItemValue('FaustEditor', 'sample_format') : "float");
+        buffer_size = Number(getStorageItemValue('FaustEditor', 'buffer_size') ?? 1024);
+        if (!buffer_size) {
+            buffer_size = 1024;
+        }
+        poly_flag = getStorageItemValue('FaustEditor', 'poly_flag') ?? "OFF";
+        poly_nvoices = Number(getStorageItemValue('FaustEditor', 'poly_nvoices') ?? 16);
+        if (!poly_nvoices) {
+            poly_nvoices = 16;
+        }
+        ftz_flag = getStorageItemValue('FaustEditor', 'ftz_flag') ?? 2;
+        rendering_mode = getStorageItemValue('FaustEditor', 'rendering_mode') ?? "ScriptProcessor";
+        sample_format = getStorageItemValue('FaustEditor', 'sample_format') ?? "float";
 
         // Possibly restore DSP source
         if (getStorageItemValue('FaustEditor', 'FaustSourceStorage') === "on" && getStorageItemValue('FaustEditor', 'dsp_code')) {

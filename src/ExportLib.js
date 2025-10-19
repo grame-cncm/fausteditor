@@ -1,4 +1,5 @@
 import QRCode from "qrcode";
+import { fetchJson, fetchWithTimeout } from "./utils/network";
 
 /************************************************************
  ***************** Interface to FaustWeb *********************
@@ -11,20 +12,8 @@ import QRCode from "qrcode";
 // @return : the available targets as a JSON application
 // json = {"platform1":["arch1", "arch2", ..., "archn"], ... , "platformn":["arch1", "arch2", ..., "archn"]}
 
-export function getTargets(exportUrl, callback, errCallback) {
-    var getrequest = new XMLHttpRequest();
-
-    getrequest.onreadystatechange = function () {
-        if (getrequest.readyState === 4 && getrequest.status === 200) {
-            callback(getrequest.responseText);
-        } else if (getrequest.readyState === 4 && getrequest.status === 400) {
-            errCallback(getrequest.responseText);
-        }
-    }
-
-    var targetsUrl = exportUrl + "/targets";
-    getrequest.open("GET", targetsUrl, true);
-    getrequest.send(null);
+export async function getTargets(exportUrl) {
+    return await fetchJson(`${exportUrl}/targets`);
 }
 
 //--- Send asynchronous POST request to FaustWeb to compile a Faust DSP
@@ -34,24 +23,19 @@ export function getTargets(exportUrl, callback, errCallback) {
 // @callback : function called once request succeeded
 // @errCallback : function called once request failed
 // @return : the sha key corresponding to source_code
-export function getSHAKey(exportUrl, name, source_code, callback, errCallback) {
-    var filename = name + ".dsp";
-    var file = new File([source_code], filename);
-    var newRequest = new XMLHttpRequest();
-    var params = new FormData();
+export async function getSHAKey(exportUrl, name, source_code) {
+    const filename = `${name}.dsp`;
+    const file = new File([source_code], filename, { type: "text/plain" });
+    const params = new FormData();
     params.append('file', file);
-    var urlToTarget = exportUrl + "/filepost";
-    newRequest.open("POST", urlToTarget, true);
-
-    newRequest.onreadystatechange = function () {
-        if (newRequest.readyState === 4 && newRequest.status === 200) {
-            callback(newRequest.responseText);
-        } else if (newRequest.readyState === 4 && newRequest.status === 400) {
-            errCallback(newRequest.responseText);
-        }
+    const response = await fetchWithTimeout(`${exportUrl}/filepost`, {
+        method: "POST",
+        body: params,
+    });
+    if (!response.ok) {
+        throw new Error(`Uploading Faust DSP failed with status ${response.status}`);
     }
-
-    newRequest.send(params);
+    return await response.text();
 }
 
 //--- Send asynchronous GET request to precompile target
@@ -60,20 +44,13 @@ export function getSHAKey(exportUrl, name, source_code, callback, errCallback) {
 // @platform/architecture : platform/architecture to precompile
 // @callback : function called once request succeeded
 // @return : @param : the sha key
-export function sendPrecompileRequest(exportUrl, sha, platform, architecture, callback) {
-    var getrequest = new XMLHttpRequest();
-
-    getrequest.onreadystatechange = function () {
-        if (getrequest.readyState === 4) {
-            callback(sha);
-        }
+export async function sendPrecompileRequest(exportUrl, sha, platform, architecture) {
+    const compileUrl = `${exportUrl}/${sha}/${platform}/${architecture}/precompile`;
+    const response = await fetchWithTimeout(compileUrl);
+    if (!response.ok) {
+        throw new Error(`Precompile request failed with status ${response.status}`);
     }
-
-    var compileUrl = exportUrl + "/" + sha + "/" + platform + "/" + architecture +
-        "/precompile";
-
-    getrequest.open("GET", compileUrl, true);
-    getrequest.send(null);
+    return sha;
 }
 
 //--- Transform target
@@ -101,19 +78,20 @@ export async function getQrCode(url, sha, plateform, architecture, target, size)
 }
 
 // Return the array of available platforms from the json description
-export function getPlatforms(json) {
-    var platforms = [];
-    var data = JSON.parse(json);
-    var index = 0;
-    for (var p in data) {
-        platforms[index] = p;
-        index++;
+function normaliseTargets(targets) {
+    if (typeof targets === "string") {
+        return JSON.parse(targets);
     }
-    return platforms;
+    return targets;
+}
+
+export function getPlatforms(targets) {
+    const data = normaliseTargets(targets);
+    return Object.keys(data);
 }
 
 // Return the list of available architectures for a specific platform from the json description
-export function getArchitectures(json, platform) {
-    var data = JSON.parse(json);
-    return data[platform];
+export function getArchitectures(targets, platform) {
+    const data = normaliseTargets(targets);
+    return data[platform] ?? [];
 }

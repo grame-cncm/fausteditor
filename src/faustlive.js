@@ -22,9 +22,24 @@ import wasmURL from "@grame/faustwasm/libfaust-wasm/libfaust-wasm.wasm?url"
 import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
 
-import { deleteQrCode, updateQrCode, cancelLoader } from "./exportUI";
+import { fetchText } from "./utils/network";
+import { deleteQrCode, updateQrCode, cancelLoader, changeArchs, onEnterKey } from "./exportUI";
 import { getSHAKey, sendPrecompileRequest } from "./ExportLib";
-import { activateMIDIInput, loadPageState, restoreMenus, saveDSPState, savePageState, setLocalStorage } from "./runfaust";
+import {
+    activateMIDIInput,
+    loadPageState,
+    restoreMenus,
+    saveDSPState,
+    savePageState,
+    setLocalStorage,
+    setBufferSize,
+    setDSPStorage,
+    setPoly,
+    setPolyVoices,
+    setRenderingMode,
+    setSampleFormat,
+    setSourceStorage,
+} from "./runfaust";
 import { audio_context, compileDSP, deleteDSP, DSP, expandDSP, workletAvailable } from "./compilefaust";
 import { getStorageItemValue } from "./localStorage"
 
@@ -65,7 +80,12 @@ const docSections = {
     "wd": "wdmodels"
 };
 
-export var codeEditor = CodeMirror.fromTextArea(myTextarea, {
+const textarea = document.getElementById("myTextarea");
+if (!textarea) {
+    throw new Error("Faust editor textarea not found");
+}
+
+export var codeEditor = CodeMirror.fromTextArea(textarea, {
     lineNumbers: true,
     mode: 'faust',
     smartIndent: true,
@@ -78,100 +98,83 @@ export var codeEditor = CodeMirror.fromTextArea(myTextarea, {
     autoCloseBrackets: true
 });
 
-function fileSelectHandler(e) {
-    fileDragHover(e);
-    var files = e.target.files || e.dataTransfer.files;
-    f = files[0];
-    uploadFile(f);
+const filenameInput = document.getElementById('filename');
+const isExternalUrl = (value) => Boolean(value) && !value.toLowerCase().startsWith('file:');
+
+function setActiveFilename(name) {
+    if (filenameInput && name) {
+        filenameInput.value = name;
+    }
 }
 
-function uploadOn(e, callback) {
-    console.log('Drop URL : ', e.dataTransfer.getData('URL'));
+function applyLoadedCode(code) {
+    if (code !== undefined && code !== null) {
+        dsp_code = code;
+        updateDSPCode();
+    }
+}
 
-    // CASE 1 : THE DROPPED OBJECT IS A URL TO SOME FAUST CODE
-    if (e.dataTransfer.getData('URL') &&
-        e.dataTransfer.getData('URL').split(':').shift() != 'file') {
-        var url = e.dataTransfer.getData('URL');
+function readFileAsText(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error ?? new Error("Unable to read file"));
+        reader.readAsText(file);
+    });
+}
 
-        // Get filename
-        var filename = url.toString().split('/').pop();
-        console.log('filename is : ', filename);
-        document.getElementById('filename').value = filename;
-        var xmlhttp = new XMLHttpRequest();
+async function resolveCodeFromEvent(event) {
+    const { dataTransfer, target } = event;
 
-        xmlhttp.onreadystatechange =
-            function () {
-                if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
-                    console.log('CASE 1');
-                    dsp_code = xmlhttp.responseText;
-                    callback();
-                }
-            }
-
-        try {
-            xmlhttp.open('GET', url, false);
-            // Avoid error "mal formé" on firefox
-            xmlhttp.overrideMimeType('text/html');
-            xmlhttp.send();
-        } catch (err) {
-            alert(err);
+    if (dataTransfer) {
+        const droppedUrl = dataTransfer.getData('URL');
+        if (isExternalUrl(droppedUrl)) {
+            console.log('CASE 1');
+            const filename = droppedUrl.toString().split('/').pop();
+            setActiveFilename(filename);
+            return await fetchText(droppedUrl, { mode: 'cors' });
         }
 
-    } else if (e.dataTransfer.getData('URL').split(':').shift() != 'file') {
-        dsp_code = e.dataTransfer.getData('text');
-
-        // CASE 2 : THE DROPPED OBJECT IS SOME FAUST CODE
-        if (dsp_code) {
+        const inlineCode = dataTransfer.getData('text');
+        if (inlineCode) {
             console.log('CASE 2');
-            // dsp_code = "process = vgroup(\"" + "TEXT" + "\", environment{" +
-            // dsp_code + "}.process);";
-            callback();
+            return inlineCode;
         }
 
-        // CASE 3 : THE DROPPED OBJECT IS A FILE CONTAINING SOME FAUST CODE
-        else {
-            var files = e.target.files || e.dataTransfer.files;
-            var file = files[0];
-
-            if (location.host.indexOf('sitepointstatic') >= 0) return;
-
-            var request = new XMLHttpRequest();
-            if (request.upload) {
-                console.log('CASE 3');
-
-                var reader = new FileReader();
-                var ext = file.name.toString().split('.').pop();
-                var filename = file.name.toString().split('.').shift();
-                console.log('filename is ', filename + '.' + ext);
-                document.getElementById('filename').value = filename + '.' + ext;
-
-                var type;
-
-                if (ext === 'dsp') {
-                    type = 'dsp';
-                    reader.readAsText(file);
-                } else if (ext === 'json') {
-                    type = 'json';
-                    reader.readAsText(file);
-                }
-
-                reader.onloadend = function (e) {
-                    dsp_code = reader.result;
-                    callback();
-                };
-            }
+        if (dataTransfer.files && dataTransfer.files.length > 0) {
+            console.log('CASE 3');
+            const file = dataTransfer.files[0];
+            setActiveFilename(file.name);
+            return await readFileAsText(file);
         }
     }
-    // CASE 4 : ANY OTHER STRANGE THING
-    else {
-        window.alert('This object is not Faust code...');
+
+    const files = target && target.files;
+    if (files && files.length > 0) {
+        console.log('CASE 3');
+        const file = files[0];
+        setActiveFilename(file.name);
+        return await readFileAsText(file);
+    }
+
+    return null;
+}
+
+async function uploadFile(event) {
+    fileDragHover(event);
+    try {
+        const code = await resolveCodeFromEvent(event);
+        if (code) {
+            applyLoadedCode(code);
+        } else {
+            window.alert('This object is not Faust code...');
+        }
+    } catch (err) {
+        console.error(err);
+        window.alert(err?.message ?? err);
     }
 }
 
-function uploadFile(e) {
-    fileDragHover(e);
-    uploadOn(e, updateDSPCode);
-}
 
 function fileDragHover(e) {
     e.stopPropagation();
@@ -344,6 +347,92 @@ function activateButtons() {
     div3.onclick = openBlockDiagram;
 }
 
+function wireUiEvents() {
+    const getElement = (id) => document.getElementById(id);
+
+    const bindClick = (id, handler) => {
+        const element = getElement(id);
+        if (element) {
+            element.addEventListener('click', handler);
+        }
+    };
+
+    const bindChange = (id, handler) => {
+        const element = getElement(id);
+        if (element) {
+            element.addEventListener('change', handler);
+        }
+    };
+
+    bindClick('upload', loadFaustCode);
+    bindClick('save', saveFaustCode);
+    bindClick('doc', faustDocumentation);
+    bindClick('config', openConfigDialog);
+    bindClick('exportButton', exportFaustSource);
+
+    const exportUrlInput = getElement('exportUrl');
+    if (exportUrlInput) {
+        exportUrlInput.addEventListener('keyup', onEnterKey);
+    }
+
+    bindChange('Platform', () => changeArchs());
+    bindChange('Architecture', () => {
+        const qrContainer = getElement('qrDiv');
+        if (qrContainer) {
+            deleteQrCode(qrContainer);
+        }
+    });
+
+    bindChange('selectedPoly', () => {
+        const select = getElement('selectedPoly');
+        if (select) {
+            setPoly(select);
+        }
+    });
+
+    bindChange('selectedBuffer', () => {
+        const select = getElement('selectedBuffer');
+        if (select) {
+            setBufferSize(select);
+        }
+    });
+
+    bindChange('polyVoices', () => {
+        const select = getElement('polyVoices');
+        if (select) {
+            setPolyVoices(select);
+        }
+    });
+
+    bindChange('selectedRenderingMode', () => {
+        const select = getElement('selectedRenderingMode');
+        if (select) {
+            setRenderingMode(select);
+        }
+    });
+
+    bindChange('selectedSampleFormat', () => {
+        const select = getElement('selectedSampleFormat');
+        if (select) {
+            setSampleFormat(select);
+        }
+    });
+
+    const dspStorage = getElement('dspstorage');
+    if (dspStorage) {
+        dspStorage.addEventListener('change', () => setDSPStorage(dspStorage.checked));
+    }
+
+    const sourceStorage = getElement('sourcestorage');
+    if (sourceStorage) {
+        sourceStorage.addEventListener('change', () => setSourceStorage(sourceStorage.checked));
+    }
+
+    document.querySelector('#faustuiwrapper .closeBtn')?.addEventListener('click', stopFaustCode);
+    document.querySelector('#exportwrapper .closeBtn')?.addEventListener('click', closeExportDialog);
+    document.querySelector('#configwrapper .closeBtn')?.addEventListener('click', closeConfigDialog);
+}
+
 // Stop the currently running Faust code
 export function stopFaustCode() {
     console.log('stop faust code');
@@ -435,13 +524,20 @@ export function faustDocumentation() {
 // Block diagram visualization
 //-----------------------------------------------------------------------
 
-function openBlockDiagram() {
+async function openBlockDiagram() {
     if (expandDSP(codeEditor.getValue())) {
         console.log('open block diagram visualisation');
-        getSHAKey(
-            document.getElementById('exportUrl').value,
-            document.getElementById('filename').value.split('.')[0],
-            codeEditor.getValue(), trigBlockDiagram, cancelLoader);
+        try {
+            const sha = await getSHAKey(
+                document.getElementById('exportUrl').value,
+                document.getElementById('filename').value.split('.')[0],
+                codeEditor.getValue());
+            trigBlockDiagram(sha);
+        } catch (error) {
+            console.error(error);
+            cancelLoader();
+            window.alert(error?.message ?? 'Unable to generate block diagram.');
+        }
     } else {
         alert(faust.getErrorMessage());
     }
@@ -494,7 +590,7 @@ function stopWaitingQrCode() {
 }
 
 // trigCompilation: sendPrecompileRequest : show QrCode if success
-function trigCompilation(key) {
+async function trigCompilation(key) {
     console.log('trigCompilation ' + key);
     var plateform =
         document.getElementById('Platform')
@@ -507,29 +603,40 @@ function trigCompilation(key) {
 
     startWaitingQrCode();
 
-    sendPrecompileRequest(
-        document.getElementById('exportUrl').value, key, plateform, architecture,
-        sha => {
-            stopWaitingQrCode();
-            updateQrCode(sha, document.getElementById('qrDiv'));
-        });
+    try {
+        const sha = await sendPrecompileRequest(
+            document.getElementById('exportUrl').value, key, plateform, architecture);
+        stopWaitingQrCode();
+        await updateQrCode(sha, document.getElementById('qrDiv'));
+    } catch (error) {
+        console.error(error);
+        stopWaitingQrCode();
+        window.alert(error?.message ?? 'Failed to trigger remote compilation.');
+    }
 }
 
 // exportFaustSource: send sourcecode to export URL : get back shakey and trig
 // compilation if success
-export function exportFaustSource() {
-    getSHAKey(
-        document.getElementById('exportUrl').value,
-        document.getElementById('filename').value.split('.')[0],
-        codeEditor.getValue(), trigCompilation, cancelLoader);
+export async function exportFaustSource() {
+    try {
+        const sha = await getSHAKey(
+            document.getElementById('exportUrl').value,
+            document.getElementById('filename').value.split('.')[0],
+            codeEditor.getValue());
+        await trigCompilation(sha);
+    } catch (error) {
+        console.error(error);
+        cancelLoader();
+        window.alert(error?.message ?? 'Failed to export Faust source.');
+    }
 
     /*
-    console.log(expandDSP(codeEditor.getValue()));
-    getSHAKey(document.getElementById("exportUrl").value,
-            document.getElementById("filename").value.split(".")[0],
-            expandDSP(codeEditor.getValue()),
-            trigCompilation,
-            cancelLoader);
+    Example alternative: export an expanded DSP instead of the raw source.
+    const expanded = expandDSP(codeEditor.getValue());
+    const sha = await getSHAKey(document.getElementById("exportUrl").value,
+        document.getElementById("filename").value.split(".")[0],
+        expanded);
+    await trigCompilation(sha);
     */
 }
 
@@ -606,6 +713,7 @@ function init() {
 
     // Configure editor
     configureDropZone('myDropZone');
+    wireUiEvents();
 
     // Check AudioWorklet support
     if (!workletAvailable()) {

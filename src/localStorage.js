@@ -1,32 +1,45 @@
-//set item from local storage 'item_key' key
-export function getStorageItemValue(item_key, key) {
-    if (localStorage.getItem(item_key)) {
-        var item_value = JSON.parse(localStorage.getItem(item_key));
-        var item_index = item_value.findIndex((obj => obj[0] === key));
-        return (item_index >= 0) ? item_value[item_index][1] : null;
-    } else {
+function parseItem(item_key) {
+    const raw = localStorage.getItem(item_key);
+    if (!raw) {
         return null;
     }
+
+    try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+            const migrated = Object.fromEntries(parsed);
+            localStorage.setItem(item_key, JSON.stringify(migrated));
+            return migrated;
+        }
+        if (parsed && typeof parsed === "object") {
+            return parsed;
+        }
+    } catch (error) {
+        console.warn(`Failed to parse localStorage entry "${item_key}":`, error);
+    }
+
+    return null;
 }
 
-//get [key, value] in local storage item_key key
+function ensureItemObject(item_key) {
+    return parseItem(item_key) ?? {};
+}
+
+// Retrieve a saved value from local storage for the given composite key.
+export function getStorageItemValue(item_key, key) {
+    const item = parseItem(item_key);
+    if (!item) {
+        return null;
+    }
+    return Object.prototype.hasOwnProperty.call(item, key) ? item[key] : null;
+}
+
+// Persist a value tied to the composite key, skipping writes when the value is unchanged.
 export function setStorageItemValue(item_key, key, value) {
-    var item_value;
-    if (localStorage.getItem(item_key)) {
-        item_value = JSON.parse(localStorage.getItem(item_key));
-    } else {
-        item_value = [];
+    const item = ensureItemObject(item_key);
+    if (Object.prototype.hasOwnProperty.call(item, key) && item[key] === value) {
+        return;
     }
-
-    // Possibly update an existing 'key'
-    var item_index = item_value.findIndex((obj => obj[0] === key));
-    if (item_index >= 0) {
-        item_value[item_index][1] = value;
-        // Otherwise push a new [key, value]
-    } else {
-        item_value.push([key, value]);
-    }
-
-    localStorage.setItem(item_key, JSON.stringify(item_value));
+    item[key] = value;
+    localStorage.setItem(item_key, JSON.stringify(item));
 }
-

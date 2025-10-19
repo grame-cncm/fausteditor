@@ -103,14 +103,15 @@ export function changeArchs() {
     }
 }
 
-function updateFWTargets() {
+async function updateFWTargets() {
     // Clean combobox before adding new options
     cleanComboBox("Platform");
     cleanComboBox("Architecture");
 
-    getTargets(document.getElementById("exportUrl").value, function (json) {
-        window.json = json;
-        var platforms = getPlatforms(json);
+    try {
+        const targets = await getTargets(document.getElementById("exportUrl").value);
+        window.json = targets;
+        var platforms = getPlatforms(targets);
 
         for (var i = 0; i < platforms.length; i++) {
             var o = document.createElement("option");
@@ -119,7 +120,10 @@ function updateFWTargets() {
         }
 
         changeArchs();
-    }, function () { });
+    } catch (error) {
+        console.error(error);
+        window.alert('Unable to retrieve available targets. Please check the export service URL.');
+    }
 }
 
 updateFWTargets();
