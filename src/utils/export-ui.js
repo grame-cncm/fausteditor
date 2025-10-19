@@ -1,4 +1,4 @@
-import { getArchitectures, getPlatforms, getQrCode, getTargets } from "./ExportLib";
+import { getArchitectures, getPlatforms, getQrCode, getTargets } from "./export-lib";
 
 export function onEnterKey(event) {
     if (!event) {

@@ -1,5 +1,5 @@
 import QRCode from "qrcode";
-import { fetchJson, fetchWithTimeout } from "./utils/network";
+import { fetchJson, fetchWithTimeout } from "./network";
 
 /************************************************************
  ***************** Interface to FaustWeb *********************

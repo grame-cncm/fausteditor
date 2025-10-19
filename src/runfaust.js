@@ -1,6 +1,6 @@
 import { audio_context, DSP, isPoly, output_handler } from "./compilefaust";
 import { codeEditor } from "./faustlive";
-import { getStorageItemValue, setStorageItemValue } from "./localStorage";
+import { getStorageItemValue, setStorageItemValue } from "./utils/local-storage";
 
 export var buffer_size = 1024;
 export var audio_input = null;

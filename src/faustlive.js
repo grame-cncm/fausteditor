@@ -23,8 +23,8 @@ import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
 
 import { fetchText } from "./utils/network";
-import { deleteQrCode, updateQrCode, cancelLoader, changeArchs, onEnterKey } from "./exportUI";
-import { getSHAKey, sendPrecompileRequest } from "./ExportLib";
+import { deleteQrCode, updateQrCode, cancelLoader, changeArchs, onEnterKey } from "./utils/export-ui";
+import { getSHAKey, sendPrecompileRequest } from "./utils/export-lib";
 import {
     activateMIDIInput,
     loadPageState,
@@ -41,7 +41,7 @@ import {
     setSourceStorage,
 } from "./runfaust";
 import { audio_context, compileDSP, deleteDSP, DSP, expandDSP, workletAvailable } from "./compilefaust";
-import { getStorageItemValue } from "./localStorage"
+import { getStorageItemValue } from "./utils/local-storage"
 
 export var dsp_code = '';
 

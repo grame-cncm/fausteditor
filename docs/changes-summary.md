@@ -6,7 +6,12 @@ This document records the structural refactor completed on the `refactor-editor-
 
 - Added `src/utils/network.js` to consolidate `fetch` helpers with a timeout guard, used across the editor and FaustWeb integrations.
 - Reworked `src/faustlive.js` drag-and-drop logic to eliminate implicit globals and synchronous `XMLHttpRequest` usage. Dropped files/URLs are now processed asynchronously with richer error handling.
-- Updated `src/ExportLib.js` and `src/exportUI.js` to rely on promise-based `fetch` calls, improving fault reporting for target discovery, source upload, and remote compilation.
+- Updated `src/utils/export-lib.js` and `src/utils/export-ui.js` to rely on promise-based `fetch` calls, improving fault reporting for target discovery, source upload, and remote compilation.
+
+## Utilities Consolidation
+
+- Moved helper modules (`export-lib`, `export-ui`, `local-storage`, `web-midi-api`) into `src/utils/` with lowercase filenames to simplify imports and align naming conventions.
+- Updated `src/faustlive.js` and `src/runfaust.js` to consume the relocated utilities.
 
 ## State & Audio Improvements
 
