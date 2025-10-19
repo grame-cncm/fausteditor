@@ -202,7 +202,6 @@ async function uploadFile(event) {
     }
 }
 
-
 /**
  * Prevent default browser behaviour while dragging files over the drop zone.
  * @param {DragEvent} e
@@ -844,7 +843,7 @@ window.addEventListener('touchstart', function () {
  * Bootstraps the editor once the Faust WASM module is available.
  */
 function init() {
-    console.log('FaustEditor: version 1.5.5');
+    console.log('FaustEditor: version 1.6.0');
 
     // Try to load code from current URL
     configureEditorFromUrlParams();

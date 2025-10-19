@@ -19,6 +19,7 @@ export var isPoly = false;
 
 export var audio_context = (isWebKitAudio) ? new webkitAudioContext({ latencyHint: 0.00001 }) : new AudioContext({ latencyHint: 0.00001 });
 audio_context.destination.channelInterpretation = "discrete";
+
 // To enable multi-channels inputs/outputs
 audio_context.destination.channelCount = audio_context.destination.maxChannelCount;
 

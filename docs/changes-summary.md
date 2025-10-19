@@ -1,6 +1,6 @@
-# Faust Editor Modernization Overview
+# Faust Editor Modernization Overview 
 
-This document records the structural refactor completed on the `refactor-editor-runtime` branch.
+This document records the structural refactor completed on the `refactor-editor-runtime` branch, done with GPT-5 Codex on 10/19/25.
 
 ## Runtime And Fetch Pipeline
 
@@ -40,5 +40,3 @@ This document records the structural refactor completed on the `refactor-editor-
 ## Build Verification
 
 - `npm run build` succeeds and emits the optimized Vite bundle. Vite warns that Node.js 20.9.0 is below the preferred 20.19.0; upgrading Node will quiet the notice but is not required for the build to pass.
-
-Feedback welcome—let me know if you would like additional lint rules, automated tests, or parity updates to the `faustlive-wasm` demo entry point.

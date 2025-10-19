@@ -47,14 +47,19 @@ let ftz_flag = "2";
 let sample_format = "float";
 let poly_nvoices = 16;
 let rendering_mode = "ScriptProcessor";
+
 /**
- * @param {string} path
- * @param {number} value
+ * Callback function passed to the DSP to handle parameter value changes
+ * (e.g., from automation or sensors) and update the UI.
+ * @param {string} path The UI path of the parameter.
+ * @param {number} value The new value.
  */
 let output_handler = (path, value) => faustUI.paramChangeByDSP(path, value);
 
 /**
- * @param {HTMLSelectElement} bs_item 
+ * Sets the audio buffer size from a select element and recompiles the DSP.
+ * Handles special cases for ScriptProcessor mode.
+ * @param {HTMLSelectElement} bs_item The select element containing buffer size options.
  */
 export const setBufferSize = (bs_item) => {
     if (!bs_item) {
@@ -70,7 +75,8 @@ export const setBufferSize = (bs_item) => {
 }
 
 /**
- * @param {HTMLSelectElement} poly_item 
+ * Sets the polyphonic mode ('ON'/'OFF') from a select element and recompiles the DSP.
+ * @param {HTMLSelectElement} poly_item The select element for polyphony.
  */
 export const setPoly = (poly_item) => {
     if (!poly_item) {
@@ -81,7 +87,8 @@ export const setPoly = (poly_item) => {
 }
 
 /**
- * @param {HTMLSelectElement} voices_item 
+ * Sets the number of polyphonic voices from a select element and recompiles the DSP.
+ * @param {HTMLSelectElement} voices_item The select element for voice count.
  */
 export const setPolyVoices = (voices_item) => {
     if (!voices_item) {
@@ -92,7 +99,9 @@ export const setPolyVoices = (voices_item) => {
 }
 
 /**
- * @param {HTMLSelectElement} rendering_item 
+ * Sets the audio rendering mode (AudioWorklet or ScriptProcessor) from a select element.
+ * Adjusts buffer size constraints accordingly and recompiles the DSP.
+ * @param {HTMLSelectElement} rendering_item The select element for rendering mode.
  */
 export const setRenderingMode = (rendering_item) => {
     if (!rendering_item) {
@@ -118,7 +127,8 @@ export const setRenderingMode = (rendering_item) => {
 }
 
 /**
- * @param {HTMLSelectElement} ftz_item 
+ * Sets the "Flush To Zero" (FTZ) optimization flag from a select element and recompiles the DSP.
+ * @param {HTMLSelectElement} ftz_item The select element for FTZ level.
  */
 export const setFTZ = (ftz_item) => {
     if (!ftz_item) {
@@ -129,7 +139,8 @@ export const setFTZ = (ftz_item) => {
 }
 
 /**
- * @param {HTMLSelectElement} sample_item 
+ * Sets the audio sample format (e.g., 'float', 'int') from a select element and recompiles the DSP.
+ * @param {HTMLSelectElement} sample_item The select element for sample format.
  */
 export const setSampleFormat = (sample_item) => {
     if (!sample_item) {
@@ -142,9 +153,10 @@ export const setSampleFormat = (sample_item) => {
 // MIDI input handling
 
 /**
- * @param {number} channel
- * @param {number} pitch
- * @param {number} velocity
+ * Sends a MIDI KeyOn message to the polyphonic DSP node.
+ * @param {number} channel MIDI channel.
+ * @param {number} pitch MIDI note number.
+ * @param {number} velocity MIDI velocity (0-127).
  */
 const keyOn = (channel, pitch, velocity) => {
     if (DSP && isPoly) {
@@ -153,9 +165,10 @@ const keyOn = (channel, pitch, velocity) => {
 }
 
 /**
- * @param {number} channel
- * @param {number} pitch
- * @param {number} velocity
+ * Sends a MIDI KeyOff message to the polyphonic DSP node.
+ * @param {number} channel MIDI channel.
+ * @param {number} pitch MIDI note number.
+ * @param {number} velocity MIDI velocity (0-127).
  */
 const keyOff = (channel, pitch, velocity) => {
     if (DSP && isPoly) {
@@ -164,8 +177,9 @@ const keyOff = (channel, pitch, velocity) => {
 }
 
 /**
- * @param {number} channel
- * @param {number} bend
+ * Sends a MIDI Pitch Wheel message to the DSP node.
+ * @param {number} channel MIDI channel.
+ * @param {number} bend Pitch bend value.
  */
 const pitchWheel = (channel, bend) => {
     if (DSP) {
@@ -174,9 +188,10 @@ const pitchWheel = (channel, bend) => {
 }
 
 /**
- * @param {number} channel
- * @param {number} ctrl
- * @param {number} value
+ * Sends a MIDI Control Change (CC) message to the DSP node.
+ * @param {number} channel MIDI channel.
+ * @param {number} ctrl CC controller number.
+ * @param {number} value CC value (0-127).
  */
 const ctrlChange = (channel, ctrl, value) => {
     if (DSP) {
@@ -185,7 +200,9 @@ const ctrlChange = (channel, ctrl, value) => {
 }
 
 /**
- * @param {MessageEvent} ev
+ * Handles incoming MIDI messages from the Web MIDI API.
+ * Parses the message and routes it to keyOn, keyOff, ctrlChange, or pitchWheel.
+ * @param {MessageEvent} ev A MIDI message event.
  */
 const midiMessageReceived = (ev) => {
     var cmd = ev.data[0] >> 4;
@@ -212,13 +229,20 @@ const midiMessageReceived = (ev) => {
     }
     */
 }
+
 /**
- * @param {Error} error 
+ * Error callback for `navigator.requestMIDIAccess`.
+ * @param {Error} error The error object.
  */
 const onerrorcallback = (error) => {
     console.log(error);
 }
 
+/**
+ * Success callback for `navigator.requestMIDIAccess`.
+ * Attaches listeners to all available MIDI input ports and handles device state changes.
+ * @param {any} access The MIDIAccess object provided by the browser.
+ */
 const onsuccesscallbackStandard = (access) => {
     access.onstatechange = function (e) {
         if (e.port.type === "input") {
@@ -238,6 +262,9 @@ const onsuccesscallbackStandard = (access) => {
     }
 }
 
+/**
+ * Requests access to the user's MIDI devices using the Web MIDI API.
+ */
 const activateMIDIInput = () => {
     console.log("activateMIDIInput");
     if (typeof (navigator.requestMIDIAccess) !== "undefined") {
@@ -248,6 +275,9 @@ const activateMIDIInput = () => {
 }
 
 /** Audio input handling */
+/**
+ * Requests access to the user's audio input (microphone) using `getUserMedia`.
+ */
 const activateAudioInput = () => {
     console.log("activateAudioInput");
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -264,7 +294,9 @@ const activateAudioInput = () => {
 }
 
 /**
- * @param {MediaStream} device 
+ * Success callback for `getUserMedia`.
+ * Creates an AudioNode from the media stream and connects it to the DSP.
+ * @param {MediaStream} device The user's audio input stream.
  */
 const getDevice = (device) => {
     // Create an AudioNode from the stream.
@@ -274,6 +306,10 @@ const getDevice = (device) => {
     audio_input.connect(DSP);
 }
 
+/**
+ * Enables or disables saving settings to Local Storage based on a checkbox state.
+ * @param {boolean} state The desired state (true for 'on', false for 'off').
+ */
 export const setLocalStorage = (state) => {
     console.log(state);
     setStorageItemValue('FaustLibTester', 'FaustLocalStorage', ((state) ? "on" : "off"));
@@ -281,9 +317,9 @@ export const setLocalStorage = (state) => {
 
 /**
  * Save/Load functions using local storage
- * 
- * @param {string} id 
- * @param {string} value 
+ * * Restores the selected option of a dropdown menu (select element) to a given value.
+ * @param {string} id The ID of the select element.
+ * @param {string} value The value to select.
  */
 const restoreMenu = (id, value) => {
     /** @type {HTMLSelectElement} */
@@ -297,6 +333,9 @@ const restoreMenu = (id, value) => {
     }
 }
 
+/**
+ * Saves all current DSP parameter values to Local Storage.
+ */
 const saveDSPState = () => {
     var params = DSP.getParams();
     for (var i = 0; i < params.length; i++) {
@@ -304,6 +343,10 @@ const saveDSPState = () => {
     }
 }
 
+/**
+ * Loads all DSP parameter values from Local Storage and applies them
+ * to both the DSP node and the Faust UI.
+ */
 const loadDSPState = () => {
     var params = DSP.getParams();
     for (var i = 0; i < params.length; i++) {
@@ -317,6 +360,10 @@ const loadDSPState = () => {
     }
 }
 
+/**
+ * Saves the main page configuration (buffer size, polyphony, FTZ, etc.)
+ * to Local Storage, if enabled.
+ */
 const savePageState = () => {
     if (getStorageItemValue('FaustLibTester', 'FaustLocalStorage') === "on") {
         setStorageItemValue('FaustLibTester', 'buffer_size', buffer_size);
@@ -328,6 +375,10 @@ const savePageState = () => {
     }
 }
 
+/**
+ * Loads the main page configuration from Local Storage (if enabled)
+ * and restores the state of the UI menus.
+ */
 const loadPageState = () => {
     if (getStorageItemValue('FaustLibTester', 'FaustLocalStorage') === "on") {
         const storedBuffer = getStorageItemValue('FaustLibTester', 'buffer_size');
@@ -363,7 +414,8 @@ const loadPageState = () => {
 }
 
 /**
- * @param {DragEvent | InputEvent} e 
+ * Handles drag-and-drop hover events to toggle a "hover" class for visual feedback.
+ * @param {DragEvent | InputEvent} e The drag event.
  */
 const fileDragHover = (e) => {
     e.stopPropagation();
@@ -374,11 +426,17 @@ const fileDragHover = (e) => {
     }
 }
 
+/**
+ * Checks if a given string is a non-file URL.
+ * @param {string} value The URL or string to check.
+ * @returns {boolean} True if the value is a non-file URL, false otherwise.
+ */
 const isExternalUrl = (value) => Boolean(value) && !value.toLowerCase().startsWith("file:");
 
 /**
- * @param {File} file
- * @returns {Promise<string>}
+ * Reads a `File` object as a text string using FileReader.
+ * @param {File} file The file to read.
+ * @returns {Promise<string>} A promise that resolves with the file's text content.
  */
 const readFileAsText = (file) => new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -388,9 +446,10 @@ const readFileAsText = (file) => new Promise((resolve, reject) => {
 });
 
 /**
- * Resolve Faust code from a drop or input event.
- * @param {DragEvent | InputEvent} event
- * @returns {Promise<string|null>}
+ * Resolves Faust code from a drop or input event.
+ * Can handle external URLs, inline text, or dropped/selected files.
+ * @param {DragEvent | InputEvent} event The browser event.
+ * @returns {Promise<string|null>} A promise that resolves with the Faust code, or null.
  */
 const resolveCodeFromEvent = async (event) => {
     if (!isWasm) {
@@ -428,6 +487,12 @@ const resolveCodeFromEvent = async (event) => {
     return null;
 }
 
+/**
+ * Checks if a DSP's JSON UI definition appears to be polyphonic
+ * by looking for standard parameters (freq, gate, gain).
+ * Issues an alert if they are missing.
+ * @param {string} json The JSON UI definition as a string.
+ */
 const checkPolyphonicDSP = (json) => {
     const content = String(json ?? "");
     const hasFreqOrKey = content.includes("/freq") || content.includes("/key");
@@ -438,6 +503,10 @@ const checkPolyphonicDSP = (json) => {
     }
 }
 
+/**
+ * Stops and destroys the current DSP node, disconnects it from the audio graph,
+ * and clears the Faust UI.
+ */
 const deleteDSP = () => {
     if (DSP) {
         if (audio_input) {
@@ -452,6 +521,11 @@ const deleteDSP = () => {
     }
 }
 
+/**
+ * Configures and activates a compiled monophonic DSP node.
+ * Connects audio input if needed, sets up the UI, and connects to the destination.
+ * @param {any} dsp The DSP node instance to activate.
+ */
 const activateMonoDSP = (dsp) => {
     if (!dsp) {
         alert(faust_compiler.getErrorMessage());
@@ -479,6 +553,11 @@ const activateMonoDSP = (dsp) => {
     loadDSPState();
 }
 
+/**
+ * Configures and activates a compiled polyphonic DSP node.
+ * Connects audio input if needed, sets up the UI, and connects to the destination.
+ * @param {any} dsp The DSP node instance to activate.
+ */
 const activatePolyDSP = (dsp) => {
     if (!dsp) {
         alert(faust_compiler.getErrorMessage());
@@ -507,6 +586,12 @@ const activatePolyDSP = (dsp) => {
     loadDSPState();
 }
 
+/**
+ * Compiles the current `dsp_code` string.
+ * This function deletes any existing DSP, prepares compiler arguments (argv)
+ * based on page settings, compiles as mono or poly, and calls the
+ * appropriate activation function.
+ */
 const compileDSP = async () => {
     if (!dsp_code) {
         return;
@@ -537,7 +622,7 @@ const compileDSP = async () => {
 
 /**
  * Handle a drop/input event by reading Faust code and recompiling the DSP.
- * @param {DragEvent | InputEvent} event
+ * @param {DragEvent | InputEvent} event The file drop or input change event.
  */
 const uploadFile = async (event) => {
     fileDragHover(event);
@@ -554,7 +639,16 @@ const uploadFile = async (event) => {
     }
 }
 
+/**
+ * Attaches 'change' event listeners to all configuration dropdowns
+ * (buffer, poly, voices, etc.) and the local storage checkbox.
+ */
 const wireConfigMenus = () => {
+    /**
+     * Helper to find a select element by ID and attach a change handler.
+     * @param {string} id The element ID.
+     * @param {(el: HTMLSelectElement) => void} handler The callback function.
+     */
     const bindSelect = (id, handler) => {
         const element = document.getElementById(id);
         if (element instanceof HTMLSelectElement) {
@@ -575,6 +669,11 @@ const wireConfigMenus = () => {
     }
 }
 
+/**
+ * Initializes the page state on load.
+ * Restores the 'localstorage' checkbox state and loads all other
+ * page settings (buffer, poly, etc.) from Local Storage.
+ */
 const initPage = () => {
     // Restore 'save' checkbox state
     const storageToggle = document.getElementById("localstorage");
@@ -588,6 +687,11 @@ const initPage = () => {
     loadPageState();
 }
 
+/**
+ * Main asynchronous initialization function.
+ * Loads and instantiates the Faust WASM module, compiler, and UI library.
+ * Sets up MIDI and drag-and-drop listeners.
+ */
 const init = async () => {
     const {
         instantiateFaustModuleFromFile,
