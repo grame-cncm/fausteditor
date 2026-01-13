@@ -53,6 +53,7 @@ const docSections = {
     "an": "analyzers",
     "ba": "basics",
     "co": "compressors",
+    "db": "debug",
     "de": "delays",
     "dm": "demos",
     "dx": "dx7",
@@ -60,6 +61,7 @@ const docSections = {
     "fd": "fds",
     "fi": "filters",
     "ho": "hoa",
+    "hy": "hysteresis",
     "it": "interpolators",
     "ma": "maths",
     "mi": "mi",
@@ -844,7 +846,7 @@ window.addEventListener('touchstart', function () {
  * Bootstraps the editor once the Faust WASM module is available.
  */
 function init() {
-    console.log('FaustEditor: version 1.6.3');
+    console.log('FaustEditor: version 1.7.0');
 
     // Try to load code from current URL
     configureEditorFromUrlParams();
