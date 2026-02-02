@@ -846,7 +846,7 @@ window.addEventListener('touchstart', function () {
  * Bootstraps the editor once the Faust WASM module is available.
  */
 function init() {
-    console.log('FaustEditor: version 1.7.0');
+    console.log('FaustEditor: version 1.7.1');
 
     // Try to load code from current URL
     configureEditorFromUrlParams();
